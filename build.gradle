@@ -1,0 +1,105 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    compileJava.options.encoding('UTF-8')
+    withJavadocJar()
+    withSourcesJar()
+}
+
+group 'io.github.amayaframework'
+archivesBaseName = 'core-tomcat'
+version = System.getenv('RELEASE_VERSION') ?: '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    from sourceSets.main.output
+    from sourceSets.main.allJava
+}
+
+signing {
+    sign publishing.publications
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            customizePom(pom)
+            groupId group
+            artifactId archivesBaseName
+            version version
+
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username System.getenv('SONATYPE_USERNAME')
+                password System.getenv('SONATYPE_PASSWORD')
+            }
+        }
+    }
+}
+
+def customizePom(pom) {
+    pom.withXml {
+        def root = asNode()
+
+        root.dependencies.removeAll { dep ->
+            dep.scope == "test"
+        }
+
+        root.children().last() + {
+            resolveStrategy = DELEGATE_FIRST
+            description 'About Amaya is a fairly lightweight web framework for Java, which guarantees speed, ' +
+                    'ease of creating plugins/addons, flexibility and ease of use. Tomcat implementation.'
+            name 'core-tomcat'
+            url 'https://github.com/AmayaFramework/amaya-core-tomcat'
+            organization {
+                name 'io.github.amayaframework'
+                url 'https://github.com/AmayaFramework'
+            }
+            issueManagement {
+                system 'GitHub'
+                url 'https://github.com/AmayaFramework/amaya-core-tomcat/issues'
+            }
+            licenses {
+                license {
+                    name 'Apache License 2.0'
+                    url 'https://github.com/AmayaFramework/amaya-core-tomcat/blob/main/LICENSE'
+                }
+            }
+            scm {
+                url 'https://github.com/AmayaFramework/amaya-core-tomcat'
+                connection 'scm:https://github.com/AmayaFramework/amaya-core-tomcat.git'
+                developerConnection 'scm:https://github.com/AmayaFramework/amaya-core-tomcat.git'
+            }
+            developers {
+                developer {
+                    id 'dev'
+                    name 'RomanQed'
+                    email 'gbakaldin@gmail.com'
+                }
+            }
+        }
+    }
+}
