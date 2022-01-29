@@ -5,6 +5,7 @@ import io.github.amayaframework.core.configurators.BaseServletConfigurator;
 import io.github.amayaframework.core.configurators.Configurator;
 import io.github.amayaframework.core.controllers.Controller;
 import io.github.amayaframework.core.handlers.ServletHandler;
+import io.github.amayaframework.core.util.AmayaConfig;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 
@@ -108,6 +109,9 @@ public class AmayaBuilder extends AbstractBuilder {
         Objects.requireNonNull(hostname);
         this.hostname = hostname;
         this.port = port;
+        if (AmayaConfig.INSTANCE.getDebug()) {
+            logger.debug("Bind server to " + hostname + ":" + port);
+        }
         return this;
     }
 
@@ -119,6 +123,9 @@ public class AmayaBuilder extends AbstractBuilder {
      */
     public AmayaBuilder bind(int port) {
         this.port = Checks.requireCorrectValue(port, e -> e >= 0);
+        if (AmayaConfig.INSTANCE.getDebug()) {
+            logger.debug("Bind server to " + (hostname == null ? "localhost" : hostname) + ":" + port);
+        }
         return this;
     }
 
@@ -133,6 +140,9 @@ public class AmayaBuilder extends AbstractBuilder {
     public AmayaBuilder context(String context, String docBase) {
         this.contextPath = Checks.requireNonNullElse(context, DEFAULT_CONTEXT);
         this.docBase = Checks.requireNonNullElse(docBase, DEFAULT_DOC_BASE);
+        if (AmayaConfig.INSTANCE.getDebug()) {
+            logger.debug("Set context to \"" + context + "\"; directory = \"" + docBase + "\"");
+        }
         return this;
     }
 
@@ -171,6 +181,7 @@ public class AmayaBuilder extends AbstractBuilder {
             context.addServletMappingDecoded(path + URL_PATTERN, path);
         });
         resetValues();
+        printLogMessage();
         return tomcat;
     }
 }
