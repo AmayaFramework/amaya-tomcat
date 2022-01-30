@@ -3,6 +3,7 @@ package io.github.amayaframework.core.pipelines;
 import com.github.romanqed.jutils.http.HttpCode;
 import io.github.amayaframework.core.routers.Route;
 import io.github.amayaframework.core.routers.Router;
+import io.github.amayaframework.core.util.ParseUtil;
 
 import java.util.Objects;
 
@@ -23,12 +24,7 @@ public class FindRouteAction extends PipelineAction<ServletRequestData, ServletR
     @Override
     public ServletRequestData apply(ServletRequestData requestData) {
         String path = requestData.servletRequest.getRequestURI().substring(length);
-        if (path.equals("/")) {
-            path = "";
-        }
-        if (path.endsWith("/")) {
-            path = path.substring(0, path.length() - 1);
-        }
+        path = ParseUtil.normalizePath(path);
         Route route = router.follow(requestData.getMethod(), path);
         if (route == null) {
             reject(HttpCode.NOT_FOUND);
