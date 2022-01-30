@@ -23,6 +23,12 @@ public class FindRouteAction extends PipelineAction<ServletRequestData, ServletR
     @Override
     public ServletRequestData apply(ServletRequestData requestData) {
         String path = requestData.servletRequest.getRequestURI().substring(length);
+        if (path.equals("/")) {
+            path = "";
+        }
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
         Route route = router.follow(requestData.getMethod(), path);
         if (route == null) {
             reject(HttpCode.NOT_FOUND);
