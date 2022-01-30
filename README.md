@@ -132,7 +132,7 @@ To learn more about the core capabilities, check [this](https://github.com/Amaya
 * [classindex](https://github.com/atteo/classindex) - Annotation scanning
 * [cglib](https://github.com/cglib/cglib) - Method wrapping
 * [slf4j](https://www.slf4j.org) - Logging facade
-* [javax.servet](https://docs.oracle.com/javaee/7/api/javax/servlet/Servlet.html) - Servlets
+* [javax.servlet](https://docs.oracle.com/javaee/7/api/javax/servlet/Servlet.html) - Servlets
 * [java-utils](https://github.com/RomanQed/java-utils) - Pipelines and other stuff
 * [amaya-core-api](https://github.com/AmayaFramework/amaya-core-api) - Basic framework utilities
 * [tomcat](https://tomcat.apache.org) - Server part
