@@ -25,6 +25,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     api group: 'org.atteo.classindex', name: 'classindex', version: '3.4'
     annotationProcessor group: 'org.atteo.classindex', name: 'classindex', version: '3.4'
+    implementation group: 'cglib', name: 'cglib', version: '3.3.0'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.35'
     implementation group: 'io.github.amayaframework', name: 'filters', version: '1.0.7'
     api group: 'io.github.amayaframework', name: 'core-api', version: '1.0.3'
