@@ -1,7 +1,7 @@
 package io.github.amayaframework.core.pipelines;
 
 import io.github.amayaframework.core.methods.HttpMethod;
-import io.github.amayaframework.core.routers.Route;
+import io.github.amayaframework.core.routes.MethodRoute;
 import io.github.amayaframework.core.util.AmayaConfig;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +17,7 @@ public class ServletRequestData extends RequestData {
     private final InputStream inputStream;
     private final Charset charset = AmayaConfig.INSTANCE.getCharset();
 
-    public ServletRequestData(HttpServletRequest request, HttpMethod method, Route route, String path)
+    public ServletRequestData(HttpServletRequest request, HttpMethod method, MethodRoute route, String path)
             throws IOException {
         super(route, path, method);
         this.servletRequest = request;

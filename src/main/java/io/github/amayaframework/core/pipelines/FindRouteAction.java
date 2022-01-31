@@ -1,8 +1,8 @@
 package io.github.amayaframework.core.pipelines;
 
 import com.github.romanqed.jutils.http.HttpCode;
-import io.github.amayaframework.core.routers.Route;
-import io.github.amayaframework.core.routers.Router;
+import io.github.amayaframework.core.routers.MethodRouter;
+import io.github.amayaframework.core.routes.MethodRoute;
 import io.github.amayaframework.core.util.ParseUtil;
 
 import java.util.Objects;
@@ -13,10 +13,10 @@ import java.util.Objects;
  * <p>Returns: {@link ServletRequestData}</p>
  */
 public class FindRouteAction extends PipelineAction<ServletRequestData, ServletRequestData> {
-    private final Router router;
+    private final MethodRouter router;
     private final int length;
 
-    public FindRouteAction(Router router, String path) {
+    public FindRouteAction(MethodRouter router, String path) {
         this.router = Objects.requireNonNull(router);
         this.length = Objects.requireNonNull(path).length();
     }
@@ -25,7 +25,7 @@ public class FindRouteAction extends PipelineAction<ServletRequestData, ServletR
     public ServletRequestData apply(ServletRequestData requestData) {
         String path = requestData.servletRequest.getRequestURI().substring(length);
         path = ParseUtil.normalizePath(path);
-        Route route = router.follow(requestData.getMethod(), path);
+        MethodRoute route = router.follow(requestData.getMethod(), path);
         if (route == null) {
             reject(HttpCode.NOT_FOUND);
         }
