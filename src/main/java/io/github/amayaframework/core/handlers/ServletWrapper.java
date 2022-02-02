@@ -12,8 +12,8 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-public class ServletWrapper extends AbstractSourceWrapper<HttpServletResponse> {
-    public ServletWrapper(Logger logger, Charset charset) {
+class ServletWrapper extends AbstractSourceWrapper<HttpServletResponse> {
+    ServletWrapper(Logger logger, Charset charset) {
         super(logger, charset);
     }
 
