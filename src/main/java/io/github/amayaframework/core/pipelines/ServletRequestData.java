@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
 /**
  * A simple container created to transfer data between pipeline actions.
  */
-public class ServletRequestData extends RequestData {
+public class ServletRequestData extends AbstractRequestData {
     protected final HttpServletRequest servletRequest;
     private final InputStream inputStream;
     private final Charset charset = AmayaConfig.INSTANCE.getCharset();

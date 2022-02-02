@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class ServletHttpRequest extends HttpRequest {
+public class ServletHttpRequest extends AbstractHttpRequest {
     protected final HttpServletRequest servletRequest;
 
     public ServletHttpRequest(HttpServletRequest servletRequest) {

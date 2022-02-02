@@ -33,7 +33,7 @@ public class ParseRequestAction extends PipelineAction<ServletRequestData, Servl
         }
         ServletHttpRequest request = new ServletHttpRequest(servletRequest);
         request.setMethod(requestData.getMethod());
-        request.setQueryParameters(query);
+        request.setQuery(query);
         request.setPathParameters(params);
         requestData.setRequest(request);
         return requestData;
