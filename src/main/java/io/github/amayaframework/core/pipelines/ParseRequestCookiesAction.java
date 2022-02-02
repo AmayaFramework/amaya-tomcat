@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class ParseRequestCookiesAction extends PipelineAction<ServletRequestData, ServletRequestData> {
     @Override
-    public ServletRequestData apply(ServletRequestData requestData) {
+    public ServletRequestData execute(ServletRequestData requestData) {
         Cookie[] cookies = requestData.servletRequest.getCookies();
         Map<String, Cookie> toAdd = new HashMap<>();
         if (cookies != null) {

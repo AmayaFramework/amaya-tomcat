@@ -22,7 +22,7 @@ public class FindRouteAction extends PipelineAction<ServletRequestData, ServletR
     }
 
     @Override
-    public ServletRequestData apply(ServletRequestData requestData) {
+    public ServletRequestData execute(ServletRequestData requestData) {
         String path = requestData.servletRequest.getRequestURI().substring(length);
         path = ParseUtil.normalizePath(path);
         MethodRoute route = router.follow(requestData.getMethod(), path);

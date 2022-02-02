@@ -1,25 +1,17 @@
 package io.github.amayaframework.core.handlers;
 
-import com.github.romanqed.jutils.http.HttpCode;
+import com.github.romanqed.jutils.pipeline.PipelineResult;
 import io.github.amayaframework.core.configurators.BaseServletConfigurator;
-import io.github.amayaframework.core.contexts.ContentType;
-import io.github.amayaframework.core.contexts.HttpResponse;
-import io.github.amayaframework.core.contexts.StreamHandler;
 import io.github.amayaframework.core.controllers.Controller;
 import io.github.amayaframework.core.methods.HttpMethod;
 import io.github.amayaframework.core.pipelines.ServletRequestData;
 import io.github.amayaframework.core.util.AmayaConfig;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.util.Collections;
 
 /**
@@ -29,68 +21,22 @@ import java.util.Collections;
  * process and verify the received HttpResponse. After that, the server receives a response.</p>
  */
 public class ServletHandler extends HttpServlet {
-    private static final Logger logger = LoggerFactory.getLogger(ServletHandler.class);
-    private final Charset charset = AmayaConfig.INSTANCE.getCharset();
     private final IOHandler handler;
+    private final ServletWrapper wrapper;
 
     public ServletHandler(Controller controller) {
         handler = new BaseIOHandler(controller, Collections.singletonList(new BaseServletConfigurator()));
+        wrapper = new ServletWrapper(LoggerFactory.getLogger(getClass()), AmayaConfig.INSTANCE.getCharset());
     }
 
     public IOHandler getHandler() {
         return handler;
     }
 
-    protected BufferedWriter wrapOutputStream(OutputStream stream) {
-        return new BufferedWriter(new OutputStreamWriter(stream, charset));
-    }
-
-    protected void reject(HttpServletResponse response, Exception e) throws IOException {
-        logger.error("Internal server error", e);
-        response.setContentType(ContentType.PLAIN.getHeader());
-        response.sendError(HttpCode.INTERNAL_SERVER_ERROR.getCode(), HttpCode.INTERNAL_SERVER_ERROR.getMessage());
-    }
-
     protected void doMethod(HttpMethod method, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ServletRequestData requestData = new ServletRequestData(req, method);
-        HttpResponse response;
-        try {
-            response = (HttpResponse) handler.process(requestData).getResult();
-        } catch (Exception e) {
-            reject(resp, e);
-            return;
-        }
-        if (response == null) {
-            reject(resp, null);
-            return;
-        }
-        ContentType type = response.getContentType();
-        if (type != null && type.isString()) {
-            response.getHeaderMap().forEach((key, value) -> value.forEach(e -> resp.addHeader(key, e)));
-            resp.setStatus(response.getCode().getCode());
-            BufferedWriter writer = wrapOutputStream(resp.getOutputStream());
-            Object body = response.getBody();
-            if (body != null) {
-                writer.write(body.toString());
-            }
-            writer.close();
-            return;
-        }
-        StreamHandler handler = response.getOutputStreamHandler();
-        if (handler == null) {
-            response.getHeaderMap().forEach((key, value) -> value.forEach(e -> resp.addHeader(key, e)));
-            resp.setStatus(response.getCode().getCode());
-            return;
-        }
-        handler.accept(resp.getOutputStream());
-        if (!handler.isSuccessful()) {
-            reject(resp, handler.getException());
-            return;
-        }
-        response.getHeaderMap().forEach((key, value) -> value.forEach(e -> resp.addHeader(key, e)));
-        resp.setStatus(response.getCode().getCode());
-        resp.setContentLength(handler.getContentLength());
-        handler.flush();
+        PipelineResult processResult = handler.process(requestData);
+        wrapper.process(resp, processResult);
     }
 
     @Override

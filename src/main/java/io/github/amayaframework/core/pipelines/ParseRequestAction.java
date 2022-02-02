@@ -19,7 +19,7 @@ import java.util.Map;
 public class ParseRequestAction extends PipelineAction<ServletRequestData, ServletRequestData> {
 
     @Override
-    public ServletRequestData apply(ServletRequestData requestData) {
+    public ServletRequestData execute(ServletRequestData requestData) {
         HttpServletRequest servletRequest = requestData.servletRequest;
         Map<String, List<String>> query = Checks.requireNonException(
                 () -> ParseUtil.parseQueryString(servletRequest.getQueryString()),
