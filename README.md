@@ -32,6 +32,7 @@ To install it, you will need:
 dependencies {
     annotationProcessor group: 'org.atteo.classindex', name: 'classindex', version: '3.4'
     implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '8.5.75'
+    implementation group: 'io.github.amayaframework', name: 'core-api', version: 'LATEST'
     implementation group: 'io.github.amayaframework', name: 'core-tomcat', version: 'LATEST'
 }
 ```
@@ -43,6 +44,12 @@ dependencies {
     <groupId>org.apache.tomcat.embed</groupId>
     <artifactId>tomcat-embed-core</artifactId>
     <version>8.5.75</version>
+</dependency>
+
+<dependency>
+    <groupId>io.github.amayaframework</groupId>
+    <artifactId>core-api</artifactId>
+    <version>LATEST</version>
 </dependency>
 
 <dependency>
