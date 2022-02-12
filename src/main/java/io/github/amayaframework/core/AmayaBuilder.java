@@ -1,11 +1,9 @@
 package io.github.amayaframework.core;
 
 import com.github.romanqed.jutils.util.Checks;
-import io.github.amayaframework.core.configurators.BaseServletConfigurator;
-import io.github.amayaframework.core.configurators.Configurator;
+import io.github.amayaframework.core.configurators.PipelineConfigurator;
 import io.github.amayaframework.core.controllers.Controller;
 import io.github.amayaframework.core.handlers.ServletHandler;
-import io.github.amayaframework.core.util.AmayaConfig;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 
@@ -19,7 +17,7 @@ import java.util.function.Consumer;
 /**
  * A builder that helps to instantiate a properly configured collection of Servlets
  */
-public class AmayaBuilder extends AbstractBuilder {
+public class AmayaBuilder extends AbstractBuilder<Tomcat> {
     private final String DEFAULT_DOC_BASE = ".";
     private final String DEFAULT_CONTEXT = "";
     private final String URL_PATTERN = "/*";
@@ -29,7 +27,7 @@ public class AmayaBuilder extends AbstractBuilder {
     private String docBase;
 
     public AmayaBuilder() {
-        super(new BaseServletConfigurator());
+        super();
         resetValues();
     }
 
@@ -49,7 +47,7 @@ public class AmayaBuilder extends AbstractBuilder {
      * @return {@link AmayaBuilder} instance
      */
     @Override
-    public AmayaBuilder pipelineConfigurators(Collection<Configurator> configurators) {
+    public AmayaBuilder pipelineConfigurators(Collection<PipelineConfigurator> configurators) {
         return (AmayaBuilder) super.pipelineConfigurators(configurators);
     }
 
@@ -60,7 +58,7 @@ public class AmayaBuilder extends AbstractBuilder {
      * @return {@link AmayaBuilder} instance
      */
     @Override
-    public AmayaBuilder addConfigurator(Configurator configurator) {
+    public AmayaBuilder addConfigurator(PipelineConfigurator configurator) {
         return (AmayaBuilder) super.addConfigurator(configurator);
     }
 
@@ -109,7 +107,7 @@ public class AmayaBuilder extends AbstractBuilder {
         Objects.requireNonNull(hostname);
         this.hostname = hostname;
         this.port = port;
-        if (AmayaConfig.INSTANCE.getDebug()) {
+        if (config.isDebug()) {
             logger.debug("Bind server to " + hostname + ":" + port);
         }
         return this;
@@ -123,7 +121,7 @@ public class AmayaBuilder extends AbstractBuilder {
      */
     public AmayaBuilder bind(int port) {
         this.port = Checks.requireCorrectValue(port, e -> e >= 0);
-        if (AmayaConfig.INSTANCE.getDebug()) {
+        if (config.isDebug()) {
             logger.debug("Bind server to " + (hostname == null ? "localhost" : hostname) + ":" + port);
         }
         return this;
@@ -140,7 +138,7 @@ public class AmayaBuilder extends AbstractBuilder {
     public AmayaBuilder context(String context, String docBase) {
         this.contextPath = Checks.requireNonNullElse(context, DEFAULT_CONTEXT);
         this.docBase = Checks.requireNonNullElse(docBase, DEFAULT_DOC_BASE);
-        if (AmayaConfig.INSTANCE.getDebug()) {
+        if (config.isDebug()) {
             logger.debug("Set context to \"" + context + "\"; directory = \"" + docBase + "\"");
         }
         return this;

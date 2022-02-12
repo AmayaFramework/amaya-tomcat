@@ -1,18 +1,14 @@
 package io.github.amayaframework.core.handlers;
 
-import com.github.romanqed.jutils.pipeline.PipelineResult;
-import io.github.amayaframework.core.configurators.BaseServletConfigurator;
+import io.github.amayaframework.core.config.AmayaConfig;
+import io.github.amayaframework.core.config.ConfigProvider;
 import io.github.amayaframework.core.controllers.Controller;
 import io.github.amayaframework.core.methods.HttpMethod;
-import io.github.amayaframework.core.pipelines.ServletRequestData;
-import io.github.amayaframework.core.util.AmayaConfig;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
 
 /**
  * <p>A class representing the servlet handler used inside the server. Built on pipelines.</p>
@@ -21,22 +17,27 @@ import java.util.Collections;
  * process and verify the received HttpResponse. After that, the server receives a response.</p>
  */
 public class ServletHandler extends HttpServlet {
-    private final IOHandler handler;
-    private final ServletWrapper wrapper;
+    private final PipelineHandler handler;
+    private final Controller controller;
+    private final AmayaConfig config;
 
     public ServletHandler(Controller controller) {
-        handler = new BaseIOHandler(controller, Collections.singletonList(new BaseServletConfigurator()));
-        wrapper = new ServletWrapper(LoggerFactory.getLogger(getClass()), AmayaConfig.INSTANCE.getCharset());
+        handler = new PipelineHandler(controller);
+        this.controller = controller;
+        config = ConfigProvider.getConfig();
     }
 
-    public IOHandler getHandler() {
+    public PipelineHandler getHandler() {
         return handler;
     }
 
     protected void doMethod(HttpMethod method, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        ServletRequestData requestData = new ServletRequestData(req, method);
-        PipelineResult processResult = handler.process(requestData);
-        wrapper.process(resp, processResult);
+        ServletSession session = new ServletSession(method, req, resp);
+        session.setConfig(config);
+        session.setController(controller);
+        handler.handle(session);
+        req.getInputStream().close();
+        resp.getOutputStream().close();
     }
 
     @Override

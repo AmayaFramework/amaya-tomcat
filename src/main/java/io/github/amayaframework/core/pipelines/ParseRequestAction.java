@@ -16,13 +16,13 @@ import java.util.Map;
  * <p>Receives: {@link ServletRequestData}</p>
  * <p>Returns: {@link ServletRequestData}</p>
  */
-public class ParseRequestAction extends PipelineAction<ServletRequestData, ServletRequestData> {
+public class ParseRequestAction extends InputAction<ServletRequestData, ServletRequestData> {
 
     @Override
     public ServletRequestData execute(ServletRequestData requestData) {
         HttpServletRequest servletRequest = requestData.servletRequest;
         Map<String, List<String>> query = Checks.requireNonException(
-                () -> ParseUtil.parseQueryString(servletRequest.getQueryString()),
+                () -> ParseUtil.parseQueryString(servletRequest.getQueryString(), requestData.getCharset()),
                 HashMap::new
         );
         Map<String, Object> params = null;

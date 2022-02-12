@@ -1,8 +1,8 @@
 package io.github.amayaframework.core.pipelines;
 
+import io.github.amayaframework.core.config.ConfigProvider;
 import io.github.amayaframework.core.methods.HttpMethod;
 import io.github.amayaframework.core.routes.MethodRoute;
-import io.github.amayaframework.core.util.AmayaConfig;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -10,22 +10,18 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 
 /**
- * A simple container created to transfer data between pipeline actions.
+ * A simple container created to transfer data between input pipeline actions.
  */
 public class ServletRequestData extends AbstractRequestData {
     protected final HttpServletRequest servletRequest;
     private final InputStream inputStream;
-    private final Charset charset = AmayaConfig.INSTANCE.getCharset();
+    private final Charset charset = ConfigProvider.getConfig().getCharset();
 
-    public ServletRequestData(HttpServletRequest request, HttpMethod method, MethodRoute route, String path)
+    public ServletRequestData(HttpServletRequest request, HttpMethod method, String path, MethodRoute route)
             throws IOException {
-        super(route, path, method);
+        super(method, path, route);
         this.servletRequest = request;
         this.inputStream = servletRequest.getInputStream();
-    }
-
-    public ServletRequestData(HttpServletRequest request, HttpMethod method) throws IOException {
-        this(request, method, null, null);
     }
 
     public HttpServletRequest getServletRequest() {
