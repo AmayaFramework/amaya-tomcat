@@ -1,6 +1,7 @@
 package io.github.amayaframework.core.pipelines;
 
 import javax.servlet.http.Cookie;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ public class ParseRequestCookiesAction extends PipelineAction<ServletRequestData
                 toAdd.put(cookie.getName(), cookie);
             }
         }
-        requestData.getRequest().setCookies(toAdd);
+        requestData.getRequest().setCookies(Collections.unmodifiableMap(toAdd));
         return requestData;
     }
 }
