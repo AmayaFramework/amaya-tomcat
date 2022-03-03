@@ -22,7 +22,7 @@ public class ServletHandler extends HttpServlet {
     private final AmayaConfig config;
 
     public ServletHandler(Controller controller) {
-        handler = new PipelineHandler(controller);
+        handler = new PipelineHandler();
         this.controller = controller;
         config = ConfigProvider.getConfig();
     }

@@ -1,9 +1,10 @@
-package io.github.amayaframework.core.pipelines;
+package io.github.amayaframework.core.actions;
 
 import io.github.amayaframework.core.config.ConfigProvider;
 import io.github.amayaframework.core.contexts.ContentType;
 import io.github.amayaframework.core.contexts.HttpResponse;
 import io.github.amayaframework.core.contexts.StreamHandler;
+import io.github.amayaframework.core.pipeline.PipelineAction;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedWriter;

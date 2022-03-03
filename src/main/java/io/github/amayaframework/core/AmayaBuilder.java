@@ -1,7 +1,7 @@
 package io.github.amayaframework.core;
 
 import com.github.romanqed.jutils.util.Checks;
-import io.github.amayaframework.core.configurators.PipelineConfigurator;
+import io.github.amayaframework.core.configurators.Configurator;
 import io.github.amayaframework.core.controllers.Controller;
 import io.github.amayaframework.core.handlers.ServletHandler;
 import org.apache.catalina.Context;
@@ -9,10 +9,7 @@ import org.apache.catalina.startup.Tomcat;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * A builder that helps to instantiate a properly configured collection of Servlets
@@ -41,25 +38,25 @@ public class AmayaBuilder extends AbstractBuilder<Tomcat> {
     }
 
     /**
-     * Sets a list of configurators that will be used when adding each controller.
+     * Adds the configurator to the end of the current list of configurators.
      *
-     * @param configurators {@link List} configurators to be set. Must be not null.
+     * @param configurator {@link Configurator} configurator to be added. Must be not null.
      * @return {@link AmayaBuilder} instance
      */
     @Override
-    public AmayaBuilder pipelineConfigurators(Collection<PipelineConfigurator> configurators) {
-        return (AmayaBuilder) super.pipelineConfigurators(configurators);
+    public AmayaBuilder addConfigurator(Configurator configurator) {
+        return (AmayaBuilder) super.addConfigurator(configurator);
     }
 
     /**
-     * Adds the configurator to the end of the current list of configurators.
+     * Deletes all configurators whose class matches the specified class.
      *
-     * @param configurator {@link Consumer} configurator to be added. Must be not null.
+     * @param clazz with which to delete
      * @return {@link AmayaBuilder} instance
      */
     @Override
-    public AmayaBuilder addConfigurator(PipelineConfigurator configurator) {
-        return (AmayaBuilder) super.addConfigurator(configurator);
+    public AmayaBuilder removeConfigurator(Class<? extends Configurator> clazz) {
+        return (AmayaBuilder) super.removeConfigurator(clazz);
     }
 
     /**
@@ -174,7 +171,7 @@ public class AmayaBuilder extends AbstractBuilder<Tomcat> {
         findControllers();
         controllers.forEach((path, controller) -> {
             ServletHandler handler = new ServletHandler(controller);
-            handler.getHandler().configure(configurators);
+            configure(handler.getHandler(), controller);
             tomcat.addServlet(contextPath, path, handler);
             context.addServletMappingDecoded(path + URL_PATTERN, path);
         });

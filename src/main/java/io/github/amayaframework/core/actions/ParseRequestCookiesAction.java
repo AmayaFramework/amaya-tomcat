@@ -1,4 +1,6 @@
-package io.github.amayaframework.core.pipelines;
+package io.github.amayaframework.core.actions;
+
+import io.github.amayaframework.core.pipeline.PipelineAction;
 
 import javax.servlet.http.Cookie;
 import java.util.Collections;
