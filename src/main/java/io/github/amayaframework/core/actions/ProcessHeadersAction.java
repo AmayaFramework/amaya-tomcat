@@ -7,6 +7,7 @@ import io.github.amayaframework.core.pipeline.PipelineAction;
 
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.Charset;
+import java.util.Locale;
 
 /**
  * <p>The output action during which the response headers is sent.</p>
@@ -25,7 +26,7 @@ public class ProcessHeadersAction extends PipelineAction<ServletResponseData, Se
         ContentType type = response.getContentType();
         if (response.getBody() != null || (type != null && !type.isString())) {
             servletResponse.setContentType(type.getHeader());
-            servletResponse.setCharacterEncoding(charset.name());
+            servletResponse.setCharacterEncoding(charset.name().toLowerCase(Locale.ROOT));
         }
         response.getCookies().forEach(servletResponse::addCookie);
         return responseData;
