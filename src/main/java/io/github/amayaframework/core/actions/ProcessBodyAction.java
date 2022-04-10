@@ -1,9 +1,10 @@
 package io.github.amayaframework.core.actions;
 
+import com.github.romanqed.jutils.util.Handler;
 import io.github.amayaframework.core.config.ConfigProvider;
 import io.github.amayaframework.core.contexts.ContentType;
+import io.github.amayaframework.core.contexts.FixedOutputStream;
 import io.github.amayaframework.core.contexts.HttpResponse;
-import io.github.amayaframework.core.contexts.StreamHandler;
 import io.github.amayaframework.core.pipeline.PipelineAction;
 
 import javax.servlet.http.HttpServletResponse;
@@ -24,11 +25,16 @@ public class ProcessBodyAction extends PipelineAction<ServletResponseData, Void>
         HttpServletResponse servletResponse = responseData.servletResponse;
         HttpResponse response = responseData.response;
         ContentType type = response.getContentType();
-        StreamHandler handler = response.getOutputStreamHandler();
+        Handler<FixedOutputStream> handler = response.getOutputStreamHandler();
         if (handler != null) {
-            handler.handle(servletResponse.getOutputStream());
-            servletResponse.setContentLength(handler.getContentLength());
-            handler.flush();
+            FixedOutputStream outputStream = new FixedOutputStream(servletResponse.getOutputStream()) {
+                @Override
+                public void specifyLength(long length) {
+                    servletResponse.setContentLengthLong(length);
+                }
+            };
+            handler.handle(outputStream);
+            outputStream.flush();
             return null;
         }
         if (type != null && type.isString()) {
