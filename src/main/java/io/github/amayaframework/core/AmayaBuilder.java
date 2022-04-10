@@ -8,6 +8,7 @@ import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Objects;
 
@@ -161,7 +162,7 @@ public class AmayaBuilder extends AbstractBuilder<Tomcat> {
         return context(null, docBase);
     }
 
-    public Tomcat build() {
+    public Tomcat build() throws IOException {
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(port);
         if (hostname != null) {

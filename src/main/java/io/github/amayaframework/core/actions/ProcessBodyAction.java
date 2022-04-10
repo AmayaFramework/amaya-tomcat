@@ -24,6 +24,13 @@ public class ProcessBodyAction extends PipelineAction<ServletResponseData, Void>
         HttpServletResponse servletResponse = responseData.servletResponse;
         HttpResponse response = responseData.response;
         ContentType type = response.getContentType();
+        StreamHandler handler = response.getOutputStreamHandler();
+        if (handler != null) {
+            handler.handle(servletResponse.getOutputStream());
+            servletResponse.setContentLength(handler.getContentLength());
+            handler.flush();
+            return null;
+        }
         if (type != null && type.isString()) {
             OutputStreamWriter streamWriter = new OutputStreamWriter(servletResponse.getOutputStream(), charset);
             BufferedWriter writer = new BufferedWriter(streamWriter);
@@ -32,15 +39,7 @@ public class ProcessBodyAction extends PipelineAction<ServletResponseData, Void>
                 writer.write(body.toString());
                 writer.flush();
             }
-            return null;
         }
-        StreamHandler handler = response.getOutputStreamHandler();
-        if (handler == null) {
-            return null;
-        }
-        handler.handle(servletResponse.getOutputStream());
-        servletResponse.setContentLength(handler.getContentLength());
-        handler.flush();
         return null;
     }
 }
