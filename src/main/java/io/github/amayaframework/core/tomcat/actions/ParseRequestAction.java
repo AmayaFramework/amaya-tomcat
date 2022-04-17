@@ -1,9 +1,9 @@
-package io.github.amayaframework.core.actions;
+package io.github.amayaframework.core.tomcat.actions;
 
 import com.github.romanqed.jutils.http.HttpCode;
 import com.github.romanqed.jutils.util.Checks;
-import io.github.amayaframework.core.contexts.ServletHttpRequest;
 import io.github.amayaframework.core.pipeline.InputAction;
+import io.github.amayaframework.core.tomcat.contexts.ServletHttpRequest;
 import io.github.amayaframework.core.util.ParseUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +33,6 @@ public class ParseRequestAction extends InputAction<ServletRequestData, ServletR
             reject(HttpCode.BAD_REQUEST);
         }
         ServletHttpRequest request = new ServletHttpRequest(servletRequest);
-        request.setMethod(requestData.getMethod());
         request.setQuery(query);
         request.setPathParameters(params);
         requestData.setRequest(request);

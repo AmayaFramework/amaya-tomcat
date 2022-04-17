@@ -1,21 +1,23 @@
-package io.github.amayaframework.core;
+package io.github.amayaframework.core.tomcat;
 
 import com.github.romanqed.jutils.util.Checks;
+import io.github.amayaframework.core.Amaya;
+import io.github.amayaframework.core.AmayaBuilder;
 import io.github.amayaframework.core.configurators.Configurator;
 import io.github.amayaframework.core.controllers.Controller;
-import io.github.amayaframework.core.handlers.ServletHandler;
+import io.github.amayaframework.core.tomcat.handlers.ServletHandler;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Objects;
 
 /**
  * A builder that helps to instantiate a properly configured collection of Servlets
  */
-public class AmayaBuilder extends AbstractBuilder<Tomcat> {
+public class TomcatBuilder extends AmayaBuilder<Tomcat> {
+    private static final String ACTIONS_PREFIX = "io.github.amayaframework.core.tomcat.actions";
     private final String DEFAULT_DOC_BASE = ".";
     private final String DEFAULT_CONTEXT = "";
     private final String URL_PATTERN = "/*";
@@ -24,8 +26,8 @@ public class AmayaBuilder extends AbstractBuilder<Tomcat> {
     private String contextPath;
     private String docBase;
 
-    public AmayaBuilder() {
-        super();
+    public TomcatBuilder() {
+        super(ACTIONS_PREFIX);
         resetValues();
     }
 
@@ -42,44 +44,44 @@ public class AmayaBuilder extends AbstractBuilder<Tomcat> {
      * Adds the configurator to the end of the current list of configurators.
      *
      * @param configurator {@link Configurator} configurator to be added. Must be not null.
-     * @return {@link AmayaBuilder} instance
+     * @return {@link TomcatBuilder} instance
      */
     @Override
-    public AmayaBuilder addConfigurator(Configurator configurator) {
-        return (AmayaBuilder) super.addConfigurator(configurator);
+    public TomcatBuilder addConfigurator(Configurator configurator) {
+        return (TomcatBuilder) super.addConfigurator(configurator);
     }
 
     /**
      * Deletes all configurators whose class matches the specified class.
      *
      * @param clazz with which to delete
-     * @return {@link AmayaBuilder} instance
+     * @return {@link TomcatBuilder} instance
      */
     @Override
-    public AmayaBuilder removeConfigurator(Class<? extends Configurator> clazz) {
-        return (AmayaBuilder) super.removeConfigurator(clazz);
+    public TomcatBuilder removeConfigurator(Class<? extends Configurator> clazz) {
+        return (TomcatBuilder) super.removeConfigurator(clazz);
     }
 
     /**
      * Adds the controller to the list of processed.
      *
      * @param controller {@link Controller} controller to be added. Must be not null.
-     * @return {@link AmayaBuilder} builder instance
+     * @return {@link TomcatBuilder} builder instance
      */
     @Override
-    public AmayaBuilder addController(Controller controller) {
-        return (AmayaBuilder) super.addController(controller);
+    public TomcatBuilder addController(Controller controller) {
+        return (TomcatBuilder) super.addController(controller);
     }
 
     /**
      * Removes the controller from the list of processed.
      *
      * @param path controller path
-     * @return {@link AmayaBuilder} instance
+     * @return {@link TomcatBuilder} instance
      */
     @Override
-    public AmayaBuilder removeController(String path) {
-        return (AmayaBuilder) super.removeController(path);
+    public TomcatBuilder removeController(String path) {
+        return (TomcatBuilder) super.removeController(path);
     }
 
     /**
@@ -87,11 +89,11 @@ public class AmayaBuilder extends AbstractBuilder<Tomcat> {
      * If value will be null, the scan will not be performed.
      *
      * @param annotation {@link Class} of annotation
-     * @return {@link AmayaBuilder} instance
+     * @return {@link TomcatBuilder} instance
      */
     @Override
-    public AmayaBuilder controllerAnnotation(Class<? extends Annotation> annotation) {
-        return (AmayaBuilder) super.controllerAnnotation(annotation);
+    public TomcatBuilder controllerAnnotation(Class<? extends Annotation> annotation) {
+        return (TomcatBuilder) super.controllerAnnotation(annotation);
     }
 
     /**
@@ -99,9 +101,9 @@ public class AmayaBuilder extends AbstractBuilder<Tomcat> {
      *
      * @param hostname hostname
      * @param port     port value
-     * @return {@link AmayaBuilder} instance
+     * @return {@link TomcatBuilder} instance
      */
-    public AmayaBuilder bind(String hostname, int port) {
+    public TomcatBuilder bind(String hostname, int port) {
         Objects.requireNonNull(hostname);
         this.hostname = hostname;
         this.port = port;
@@ -115,9 +117,9 @@ public class AmayaBuilder extends AbstractBuilder<Tomcat> {
      * Binds tomcat to received host and port.
      *
      * @param port port value
-     * @return {@link AmayaBuilder} instance
+     * @return {@link TomcatBuilder} instance
      */
-    public AmayaBuilder bind(int port) {
+    public TomcatBuilder bind(int port) {
         this.port = Checks.requireCorrectValue(port, e -> e >= 0);
         if (config.isDebug()) {
             logger.debug("Bind server to " + (hostname == null ? "localhost" : hostname) + ":" + port);
@@ -131,9 +133,9 @@ public class AmayaBuilder extends AbstractBuilder<Tomcat> {
      *
      * @param context context path, by default is ""
      * @param docBase directory for static files. Must exist, relative to the server home.
-     * @return {@link AmayaBuilder} instance
+     * @return {@link TomcatBuilder} instance
      */
-    public AmayaBuilder context(String context, String docBase) {
+    public TomcatBuilder context(String context, String docBase) {
         this.contextPath = Checks.requireNonNullElse(context, DEFAULT_CONTEXT);
         this.docBase = Checks.requireNonNullElse(docBase, DEFAULT_DOC_BASE);
         if (config.isDebug()) {
@@ -146,9 +148,9 @@ public class AmayaBuilder extends AbstractBuilder<Tomcat> {
      * Sets tomcat context path relative to which all servlets will be added.
      *
      * @param context context path, by default is ""
-     * @return {@link AmayaBuilder} instance
+     * @return {@link TomcatBuilder} instance
      */
-    public AmayaBuilder context(String context) {
+    public TomcatBuilder context(String context) {
         return context(context, null);
     }
 
@@ -156,13 +158,14 @@ public class AmayaBuilder extends AbstractBuilder<Tomcat> {
      * Sets tomcat base directory for the context.
      *
      * @param docBase directory for static files. Must exist, relative to the server home.
-     * @return {@link AmayaBuilder} instance
+     * @return {@link TomcatBuilder} instance
      */
-    public AmayaBuilder docBase(String docBase) {
+    public TomcatBuilder docBase(String docBase) {
         return context(null, docBase);
     }
 
-    public Tomcat build() throws IOException {
+    @Override
+    public Amaya<Tomcat> build() {
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(port);
         if (hostname != null) {
@@ -177,7 +180,6 @@ public class AmayaBuilder extends AbstractBuilder<Tomcat> {
             context.addServletMappingDecoded(path + URL_PATTERN, path);
         });
         resetValues();
-        printLogMessage();
-        return tomcat;
+        return new TomcatAmaya(tomcat);
     }
 }

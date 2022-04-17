@@ -1,8 +1,9 @@
-package io.github.amayaframework.core.handlers;
+package io.github.amayaframework.core.tomcat.handlers;
 
 import io.github.amayaframework.core.config.AmayaConfig;
 import io.github.amayaframework.core.config.ConfigProvider;
 import io.github.amayaframework.core.controllers.Controller;
+import io.github.amayaframework.core.handlers.PipelineHandler;
 import io.github.amayaframework.core.methods.HttpMethod;
 
 import javax.servlet.http.HttpServlet;

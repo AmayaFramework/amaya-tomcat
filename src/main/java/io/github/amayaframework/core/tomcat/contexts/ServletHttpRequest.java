@@ -1,4 +1,6 @@
-package io.github.amayaframework.core.contexts;
+package io.github.amayaframework.core.tomcat.contexts;
+
+import io.github.amayaframework.core.contexts.AbstractHttpRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;

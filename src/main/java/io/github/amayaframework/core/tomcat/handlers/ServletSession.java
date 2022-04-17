@@ -1,17 +1,18 @@
-package io.github.amayaframework.core.handlers;
+package io.github.amayaframework.core.tomcat.handlers;
 
 import com.github.romanqed.jutils.http.HttpCode;
 import com.github.romanqed.jutils.util.Action;
-import io.github.amayaframework.core.actions.ServletRequestData;
-import io.github.amayaframework.core.actions.ServletResponseData;
 import io.github.amayaframework.core.config.AmayaConfig;
 import io.github.amayaframework.core.contexts.ContentType;
 import io.github.amayaframework.core.contexts.HttpResponse;
 import io.github.amayaframework.core.contexts.Responses;
 import io.github.amayaframework.core.controllers.Controller;
+import io.github.amayaframework.core.handlers.Session;
 import io.github.amayaframework.core.methods.HttpMethod;
 import io.github.amayaframework.core.routers.MethodRouter;
 import io.github.amayaframework.core.routes.MethodRoute;
+import io.github.amayaframework.core.tomcat.actions.ServletRequestData;
+import io.github.amayaframework.core.tomcat.actions.ServletResponseData;
 import io.github.amayaframework.core.util.ParseUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,7 +43,7 @@ public class ServletSession implements Session {
     }
 
     @Override
-    public HttpResponse handleInput(Action<Object, Object> handler) throws Exception {
+    public HttpResponse handleInput(Action<Object, Object> handler) throws Throwable {
         String path = request.getRequestURI().substring(length);
         path = ParseUtil.normalizePath(path);
         MethodRoute route = router.follow(method, path);
@@ -55,13 +56,13 @@ public class ServletSession implements Session {
     }
 
     @Override
-    public void handleOutput(Action<Object, Object> handler, HttpResponse response) throws Exception {
+    public void handleOutput(Action<Object, Object> handler, HttpResponse response) throws Throwable {
         ServletResponseData responseData = new ServletResponseData(this.response, response);
         handler.execute(responseData);
     }
 
     @Override
-    public void reject(Exception e) throws IOException {
+    public void reject(Throwable e) throws IOException {
         HttpCode code = HttpCode.INTERNAL_SERVER_ERROR;
         String message = code.getMessage() + "\n";
         if (e != null && config.isDebug()) {

@@ -1,4 +1,4 @@
-package io.github.amayaframework.core.actions;
+package io.github.amayaframework.core.tomcat.actions;
 
 import com.github.romanqed.jutils.util.Handler;
 import io.github.amayaframework.core.config.ConfigProvider;
@@ -21,7 +21,7 @@ public class ProcessBodyAction extends PipelineAction<ServletResponseData, Void>
     private final Charset charset = ConfigProvider.getConfig().getCharset();
 
     @Override
-    public Void execute(ServletResponseData responseData) throws Exception {
+    public Void execute(ServletResponseData responseData) throws Throwable {
         HttpServletResponse servletResponse = responseData.servletResponse;
         HttpResponse response = responseData.response;
         ContentType type = response.getContentType();
