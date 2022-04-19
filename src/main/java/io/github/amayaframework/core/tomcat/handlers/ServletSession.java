@@ -14,6 +14,7 @@ import io.github.amayaframework.core.routes.MethodRoute;
 import io.github.amayaframework.core.tomcat.actions.ServletRequestData;
 import io.github.amayaframework.core.tomcat.actions.ServletResponseData;
 import io.github.amayaframework.core.util.ParseUtil;
+import org.apache.commons.text.StringEscapeUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -72,6 +73,7 @@ public class ServletSession implements Session {
                 message += "Caused by: \n" + ParseUtil.throwableToString(caused);
             }
         }
+        message = StringEscapeUtils.escapeHtml4(message);
         reject(code, message);
     }
 

@@ -1,6 +1,6 @@
 package io.github.amayaframework.core.tomcat.actions;
 
-import io.github.amayaframework.core.config.ConfigProvider;
+import io.github.amayaframework.core.ConfigProvider;
 import io.github.amayaframework.core.contexts.ContentType;
 import io.github.amayaframework.core.contexts.HttpResponse;
 import io.github.amayaframework.core.pipeline.PipelineAction;
@@ -20,7 +20,7 @@ public class ProcessHeadersAction extends PipelineAction<ServletResponseData, Se
     @Override
     public ServletResponseData execute(ServletResponseData responseData) {
         HttpServletResponse servletResponse = responseData.servletResponse;
-        HttpResponse response = responseData.response;
+        HttpResponse response = responseData.getResponse();
         servletResponse.setStatus(response.getCode().getCode());
         response.getHeaderMap().forEach((key, value) -> value.forEach(e -> servletResponse.addHeader(key, e)));
         ContentType type = response.getContentType();

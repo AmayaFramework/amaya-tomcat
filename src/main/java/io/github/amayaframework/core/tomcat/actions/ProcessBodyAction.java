@@ -1,7 +1,7 @@
 package io.github.amayaframework.core.tomcat.actions;
 
 import com.github.romanqed.jutils.util.Handler;
-import io.github.amayaframework.core.config.ConfigProvider;
+import io.github.amayaframework.core.ConfigProvider;
 import io.github.amayaframework.core.contexts.ContentType;
 import io.github.amayaframework.core.contexts.FixedOutputStream;
 import io.github.amayaframework.core.contexts.HttpResponse;
@@ -23,7 +23,7 @@ public class ProcessBodyAction extends PipelineAction<ServletResponseData, Void>
     @Override
     public Void execute(ServletResponseData responseData) throws Throwable {
         HttpServletResponse servletResponse = responseData.servletResponse;
-        HttpResponse response = responseData.response;
+        HttpResponse response = responseData.getResponse();
         ContentType type = response.getContentType();
         Handler<FixedOutputStream> handler = response.getOutputStreamHandler();
         if (handler != null) {
