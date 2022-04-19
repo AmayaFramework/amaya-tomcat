@@ -28,7 +28,6 @@ public class TomcatBuilder extends AmayaBuilder<Tomcat> {
 
     public TomcatBuilder() {
         super(ACTIONS_PREFIX);
-        resetValues();
     }
 
     @Override
@@ -180,6 +179,7 @@ public class TomcatBuilder extends AmayaBuilder<Tomcat> {
             context.addServletMappingDecoded(path + URL_PATTERN, path);
         });
         resetValues();
+        resetConfig();
         return new TomcatAmaya(tomcat);
     }
 }

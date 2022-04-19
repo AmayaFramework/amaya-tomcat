@@ -13,6 +13,7 @@ import io.github.amayaframework.core.routers.MethodRouter;
 import io.github.amayaframework.core.routes.MethodRoute;
 import io.github.amayaframework.core.tomcat.actions.ServletRequestData;
 import io.github.amayaframework.core.tomcat.actions.ServletResponseData;
+import io.github.amayaframework.core.util.IOUtil;
 import io.github.amayaframework.core.util.ParseUtil;
 import org.apache.commons.text.StringEscapeUtils;
 
@@ -36,7 +37,7 @@ public class ServletSession implements Session {
 
     public void setController(Controller controller) {
         this.router = controller.getRouter();
-        this.length = controller.getPath().length();
+        this.length = controller.getRoute().length();
     }
 
     public void setConfig(AmayaConfig config) {
@@ -46,7 +47,7 @@ public class ServletSession implements Session {
     @Override
     public HttpResponse handleInput(Action<Object, Object> handler) throws Throwable {
         String path = request.getRequestURI().substring(length);
-        path = ParseUtil.normalizePath(path);
+        path = ParseUtil.normalizeRoute(path);
         MethodRoute route = router.follow(method, path);
         if (route == null) {
             HttpCode code = HttpCode.NOT_FOUND;
@@ -67,19 +68,18 @@ public class ServletSession implements Session {
         HttpCode code = HttpCode.INTERNAL_SERVER_ERROR;
         String message = code.getMessage() + "\n";
         if (e != null && config.isDebug()) {
-            message += ParseUtil.throwableToString(e) + "\n";
+            message += IOUtil.throwableToString(e) + "\n";
             Throwable caused = e.getCause();
             if (caused != null) {
-                message += "Caused by: \n" + ParseUtil.throwableToString(caused);
+                message += "Caused by: \n" + IOUtil.throwableToString(caused);
             }
         }
-        message = StringEscapeUtils.escapeHtml4(message);
         reject(code, message);
     }
 
     @Override
     public void reject(HttpCode code, String message) throws IOException {
-        String header = ParseUtil.generateContentHeader(ContentType.PLAIN, config.getCharset());
+        String header = IOUtil.generateContentHeader(ContentType.PLAIN, config.getCharset());
         response.setContentType(header);
         String toSend;
         if (message != null) {
