@@ -1,11 +1,13 @@
 package io.github.amayaframework.core.tomcat;
 
-import com.github.romanqed.jutils.util.Checks;
+import com.github.romanqed.util.Checks;
 import io.github.amayaframework.core.Amaya;
 import io.github.amayaframework.core.AmayaBuilder;
+import io.github.amayaframework.core.config.AmayaConfig;
 import io.github.amayaframework.core.configurators.Configurator;
-import io.github.amayaframework.core.controllers.Controller;
-import io.github.amayaframework.core.tomcat.handlers.ServletHandler;
+import io.github.amayaframework.core.handlers.EventManager;
+import io.github.amayaframework.core.handlers.PipelineHandler;
+import io.github.amayaframework.core.tomcat.handlers.AmayaServlet;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 
@@ -17,7 +19,7 @@ import java.util.Objects;
  * A builder that helps to instantiate a properly configured collection of Servlets
  */
 public class TomcatBuilder extends AmayaBuilder<Tomcat> {
-    private static final String ACTIONS_PREFIX = "io.github.amayaframework.core.tomcat.actions";
+    private static final String PREFIX = "io.github.amayaframework.core.tomcat.actions";
     private final String DEFAULT_DOC_BASE = ".";
     private final String DEFAULT_CONTEXT = "";
     private final String URL_PATTERN = "/*";
@@ -26,8 +28,12 @@ public class TomcatBuilder extends AmayaBuilder<Tomcat> {
     private String contextPath;
     private String docBase;
 
+    public TomcatBuilder(AmayaConfig config) {
+        super(config, PREFIX);
+    }
+
     public TomcatBuilder() {
-        super(ACTIONS_PREFIX);
+        super(new AmayaConfig(), PREFIX);
     }
 
     @Override
@@ -62,14 +68,15 @@ public class TomcatBuilder extends AmayaBuilder<Tomcat> {
     }
 
     /**
-     * Adds the controller to the list of processed.
+     * Adds the controller to the list of processed
      *
-     * @param controller {@link Controller} controller to be added. Must be not null.
+     * @param route  route of the controller
+     * @param object object to be packed into controller
      * @return {@link TomcatBuilder} builder instance
      */
     @Override
-    public TomcatBuilder addController(Controller controller) {
-        return (TomcatBuilder) super.addController(controller);
+    public TomcatBuilder addController(String route, Object object) throws Throwable {
+        return (TomcatBuilder) super.addController(route, object);
     }
 
     /**
@@ -164,22 +171,23 @@ public class TomcatBuilder extends AmayaBuilder<Tomcat> {
     }
 
     @Override
-    public Amaya<Tomcat> build() {
+    public Amaya<Tomcat> build() throws Throwable {
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(port);
         if (hostname != null) {
             tomcat.setHostname(hostname);
         }
         Context context = tomcat.addContext(contextPath, new File(docBase).getAbsolutePath());
+        EventManager manager = new EventManager(executor, config.isDebug());
         findControllers();
         controllers.forEach((path, controller) -> {
-            ServletHandler handler = new ServletHandler(controller);
-            configure(handler.getHandler(), controller);
-            tomcat.addServlet(contextPath, path, handler);
+            PipelineHandler handler = new PipelineHandler(config.useAsync(), manager);
+            AmayaServlet servlet = new AmayaServlet(controller, handler, config);
+            configure(handler, controller);
+            tomcat.addServlet(contextPath, path, servlet);
             context.addServletMappingDecoded(path + URL_PATTERN, path);
         });
         resetValues();
-        resetConfig();
-        return new TomcatAmaya(tomcat);
+        return new TomcatAmaya(manager, tomcat);
     }
 }

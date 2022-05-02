@@ -1,6 +1,5 @@
 package io.github.amayaframework.core.tomcat.handlers;
 
-import io.github.amayaframework.core.ConfigProvider;
 import io.github.amayaframework.core.config.AmayaConfig;
 import io.github.amayaframework.core.controllers.Controller;
 import io.github.amayaframework.core.handlers.PipelineHandler;
@@ -17,19 +16,15 @@ import java.io.IOException;
  * resulting in an HttpResponse. Then the output pipeline is triggered, the purpose of which is to
  * process and verify the received HttpResponse. After that, the server receives a response.</p>
  */
-public class ServletHandler extends HttpServlet {
+public class AmayaServlet extends HttpServlet {
     private final PipelineHandler handler;
     private final Controller controller;
     private final AmayaConfig config;
 
-    public ServletHandler(Controller controller) {
-        handler = new PipelineHandler();
+    public AmayaServlet(Controller controller, PipelineHandler handler, AmayaConfig config) {
+        this.handler = handler;
         this.controller = controller;
-        config = ConfigProvider.getConfig();
-    }
-
-    public PipelineHandler getHandler() {
-        return handler;
+        this.config = config;
     }
 
     protected void doMethod(HttpMethod method, HttpServletRequest req, HttpServletResponse resp) throws IOException {

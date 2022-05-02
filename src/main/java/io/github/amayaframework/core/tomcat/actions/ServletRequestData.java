@@ -1,9 +1,7 @@
 package io.github.amayaframework.core.tomcat.actions;
 
-import io.github.amayaframework.core.ConfigProvider;
-import io.github.amayaframework.core.methods.HttpMethod;
 import io.github.amayaframework.core.pipeline.AbstractRequestData;
-import io.github.amayaframework.core.routes.MethodRoute;
+import io.github.amayaframework.core.pipeline.RouteData;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -16,13 +14,13 @@ import java.nio.charset.Charset;
 public class ServletRequestData extends AbstractRequestData {
     protected final HttpServletRequest servletRequest;
     private final InputStream inputStream;
-    private final Charset charset = ConfigProvider.getConfig().getCharset();
+    private final Charset charset;
 
-    public ServletRequestData(HttpServletRequest request, HttpMethod method, String path, MethodRoute route)
-            throws IOException {
-        super(method, path, route);
+    public ServletRequestData(HttpServletRequest request, RouteData data, Charset charset) throws IOException {
+        super(data);
         this.servletRequest = request;
         this.inputStream = servletRequest.getInputStream();
+        this.charset = charset;
     }
 
     public HttpServletRequest getServletRequest() {

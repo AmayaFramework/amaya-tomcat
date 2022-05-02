@@ -1,19 +1,19 @@
 package io.github.amayaframework.core.tomcat;
 
-import io.github.amayaframework.core.Amaya;
-import io.github.amayaframework.core.util.IOUtil;
-import org.apache.catalina.LifecycleException;
+import io.github.amayaframework.core.AbstractAmaya;
+import io.github.amayaframework.core.handlers.EventManager;
 import org.apache.catalina.startup.Tomcat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class TomcatAmaya implements Amaya<Tomcat> {
+public class TomcatAmaya extends AbstractAmaya<Tomcat> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TomcatAmaya.class);
     private final Tomcat server;
 
-    protected TomcatAmaya(Tomcat server) {
+    protected TomcatAmaya(EventManager manager, Tomcat server) {
+        super(manager);
         this.server = server;
     }
 
@@ -40,15 +40,17 @@ public class TomcatAmaya implements Amaya<Tomcat> {
     }
 
     @Override
-    public void start() throws IOException, LifecycleException {
-        printHelloMessage();
+    public void start() throws Throwable {
         server.start();
         server.getServer().await();
+        printHelloMessage();
+        super.start();
     }
 
     @Override
     public void close() throws Exception {
         server.stop();
         LOGGER.info("Amaya server stopped");
+        super.close();
     }
 }

@@ -1,10 +1,11 @@
 package io.github.amayaframework.core.tomcat.actions;
 
-import com.github.romanqed.jutils.http.HttpCode;
-import com.github.romanqed.jutils.util.Checks;
+import com.github.romanqed.util.Checks;
 import io.github.amayaframework.core.pipeline.InputAction;
 import io.github.amayaframework.core.tomcat.contexts.ServletHttpRequest;
 import io.github.amayaframework.core.util.ParseUtil;
+import io.github.amayaframework.http.HttpCode;
+import io.github.amayaframework.http.HttpUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -22,9 +23,9 @@ public class ParseRequestAction extends InputAction<ServletRequestData, ServletR
     @Override
     public ServletRequestData execute(ServletRequestData requestData) {
         HttpServletRequest servletRequest = requestData.servletRequest;
-        Map<String, List<String>> query = Checks.requireNonException(
-                () -> ParseUtil.parseQueryString(servletRequest.getQueryString(), requestData.getCharset()),
-                HashMap::new
+        Map<String, List<String>> query = Checks.safetyCall(
+                () -> HttpUtil.parseQueryString(servletRequest.getQueryString(), requestData.getCharset()),
+                () -> new HashMap<>()
         );
         Map<String, Object> params = null;
         try {

@@ -1,9 +1,10 @@
 package io.github.amayaframework.core.tomcat.actions;
 
-import io.github.amayaframework.core.ConfigProvider;
-import io.github.amayaframework.core.contexts.ContentType;
+import io.github.amayaframework.core.actions.WithConfig;
+import io.github.amayaframework.core.config.AmayaConfig;
 import io.github.amayaframework.core.contexts.HttpResponse;
 import io.github.amayaframework.core.pipeline.PipelineAction;
+import io.github.amayaframework.http.ContentType;
 
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.Charset;
@@ -14,8 +15,13 @@ import java.util.Locale;
  * <p>Receives: {@link ServletResponseData}</p>
  * <p>Returns: {@link ServletResponseData}</p>
  */
+@WithConfig
 public class ProcessHeadersAction extends PipelineAction<ServletResponseData, ServletResponseData> {
-    private final Charset charset = ConfigProvider.getConfig().getCharset();
+    private final Charset charset;
+
+    public ProcessHeadersAction(AmayaConfig config) {
+        this.charset = config.getCharset();
+    }
 
     @Override
     public ServletResponseData execute(ServletResponseData responseData) {

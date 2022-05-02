@@ -1,11 +1,12 @@
 package io.github.amayaframework.core.tomcat.actions;
 
-import com.github.romanqed.jutils.util.Handler;
-import io.github.amayaframework.core.ConfigProvider;
-import io.github.amayaframework.core.contexts.ContentType;
+import com.github.romanqed.util.Handler;
+import io.github.amayaframework.core.actions.WithConfig;
+import io.github.amayaframework.core.config.AmayaConfig;
 import io.github.amayaframework.core.contexts.FixedOutputStream;
 import io.github.amayaframework.core.contexts.HttpResponse;
 import io.github.amayaframework.core.pipeline.PipelineAction;
+import io.github.amayaframework.http.ContentType;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedWriter;
@@ -17,8 +18,13 @@ import java.nio.charset.Charset;
  * <p>Receives: {@link ServletResponseData}</p>
  * <p>Returns: {@link Void}</p>
  */
+@WithConfig
 public class ProcessBodyAction extends PipelineAction<ServletResponseData, Void> {
-    private final Charset charset = ConfigProvider.getConfig().getCharset();
+    private final Charset charset;
+
+    public ProcessBodyAction(AmayaConfig config) {
+        this.charset = config.getCharset();
+    }
 
     @Override
     public Void execute(ServletResponseData responseData) throws Throwable {
