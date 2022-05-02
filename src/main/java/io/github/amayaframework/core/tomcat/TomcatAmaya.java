@@ -20,7 +20,6 @@ public class TomcatAmaya extends AbstractAmaya<Tomcat> {
     private static void printHelloMessage() throws IOException {
         LOGGER.info("Amaya started successfully");
         LOGGER.info("\n" + IOUtil.readLogo());
-        LOGGER.info("We are glad to welcome you, senpai!");
         LOGGER.info("\n" + IOUtil.readArt());
     }
 
@@ -41,10 +40,10 @@ public class TomcatAmaya extends AbstractAmaya<Tomcat> {
 
     @Override
     public void start() throws Throwable {
-        server.start();
-        server.getServer().await();
         printHelloMessage();
         super.start();
+        server.start();
+        server.getServer().await();
     }
 
     @Override
