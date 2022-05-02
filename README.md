@@ -1,4 +1,4 @@
-# amaya-core-tomcat [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/core-tomcat?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/core-tomcat/)
+# amaya-tomcat [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-tomcat?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-tomcat/)
 
 Amaya is a fairly lightweight web framework for Java, which guarantees speed, ease of creating plugins/addons, 
 flexibility and ease of use.
@@ -28,8 +28,8 @@ To install it, you will need:
 
 ```Groovy
 dependencies {
-    annotationProcessor group: 'org.atteo.classindex', name: 'classindex', version: '3.4'
-    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '8.5.75'
+    annotationProcessor group: 'org.atteo.classindex', name: 'classindex', version: '3.11'
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '8.5.78'
     implementation group: 'io.github.amayaframework', name: 'amaya-core', version: '1+'
     implementation group: 'io.github.amayaframework', name: 'amaya-tomcat', version: 'LATEST'
 }
@@ -41,7 +41,7 @@ dependencies {
 <dependency>
     <groupId>org.apache.tomcat.embed</groupId>
     <artifactId>tomcat-embed-core</artifactId>
-    <version>8.5.75</version>
+    <version>8.5.78</version>
 </dependency>
 
 <dependency>
