@@ -34,7 +34,15 @@ public class ServletRequestData extends AbstractRequestData {
 
     @Override
     public String getContentType() {
-        return servletRequest.getContentType();
+        String contentHeader = servletRequest.getContentType();
+        if (contentHeader == null) {
+            return null;
+        }
+        int position = contentHeader.indexOf(';');
+        if (position < 0) {
+            return contentHeader;
+        }
+        return contentHeader.substring(0, position);
     }
 
     @Override
