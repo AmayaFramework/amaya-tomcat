@@ -12,7 +12,6 @@ import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 
 import java.io.File;
-import java.lang.annotation.Annotation;
 import java.util.Objects;
 
 /**
@@ -91,18 +90,6 @@ public class TomcatBuilder extends AmayaBuilder<Tomcat> {
     }
 
     /**
-     * Sets the annotation by which the controllers will be scanned.
-     * If value will be null, the scan will not be performed.
-     *
-     * @param annotation {@link Class} of annotation
-     * @return {@link TomcatBuilder} instance
-     */
-    @Override
-    public TomcatBuilder controllerAnnotation(Class<? extends Annotation> annotation) {
-        return (TomcatBuilder) super.controllerAnnotation(annotation);
-    }
-
-    /**
      * Binds tomcat to received host and port.
      *
      * @param hostname hostname
@@ -141,7 +128,7 @@ public class TomcatBuilder extends AmayaBuilder<Tomcat> {
      * @param docBase directory for static files. Must exist, relative to the server home.
      * @return {@link TomcatBuilder} instance
      */
-    public TomcatBuilder context(String context, String docBase) {
+    public TomcatBuilder setContext(String context, String docBase) {
         this.contextPath = Checks.requireNonNullElse(context, DEFAULT_CONTEXT);
         this.docBase = Checks.requireNonNullElse(docBase, DEFAULT_DOC_BASE);
         if (config.isDebug()) {
@@ -156,8 +143,8 @@ public class TomcatBuilder extends AmayaBuilder<Tomcat> {
      * @param context context path, by default is ""
      * @return {@link TomcatBuilder} instance
      */
-    public TomcatBuilder context(String context) {
-        return context(context, null);
+    public TomcatBuilder setContext(String context) {
+        return setContext(context, null);
     }
 
     /**
@@ -166,8 +153,8 @@ public class TomcatBuilder extends AmayaBuilder<Tomcat> {
      * @param docBase directory for static files. Must exist, relative to the server home.
      * @return {@link TomcatBuilder} instance
      */
-    public TomcatBuilder docBase(String docBase) {
-        return context(null, docBase);
+    public TomcatBuilder setDocBase(String docBase) {
+        return setContext(null, docBase);
     }
 
     @Override
