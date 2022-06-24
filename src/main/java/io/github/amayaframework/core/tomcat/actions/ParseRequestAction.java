@@ -8,6 +8,7 @@ import io.github.amayaframework.http.HttpCode;
 import io.github.amayaframework.http.HttpUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,22 +22,24 @@ import java.util.Map;
 public class ParseRequestAction extends InputAction<ServletRequestData, ServletRequestData> {
 
     @Override
-    public ServletRequestData execute(ServletRequestData requestData) {
-        HttpServletRequest servletRequest = requestData.servletRequest;
+    public ServletRequestData execute(ServletRequestData data) {
+        HttpServletRequest servletRequest = data.servletRequest;
+        Charset charset = data.getCharset();
         Map<String, List<String>> query = Checks.safetyCall(
-                () -> HttpUtil.parseQueryString(servletRequest.getQueryString(), requestData.getCharset()),
+                () -> HttpUtil.parseQueryString(servletRequest.getQueryString(), charset),
                 () -> new HashMap<>()
         );
         Map<String, Object> params = null;
         try {
-            params = ParseUtil.extractRouteParameters(requestData.getRoute(), requestData.getPath());
+            params = ParseUtil.extractRouteParameters(data.getRoute(), data.getPath());
         } catch (Exception e) {
             reject(HttpCode.BAD_REQUEST);
         }
         ServletHttpRequest request = new ServletHttpRequest(servletRequest);
+        request.setCharset(charset);
         request.setQuery(query);
         request.setPathParameters(params);
-        requestData.setRequest(request);
-        return requestData;
+        data.setRequest(request);
+        return data;
     }
 }

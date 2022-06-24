@@ -9,6 +9,7 @@ import io.github.amayaframework.http.ContentType;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.Charset;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * <p>The output action during which the response headers is sent.</p>
@@ -27,11 +28,13 @@ public class ProcessHeadersAction extends PipelineAction<ServletResponseData, Se
     public ServletResponseData execute(ServletResponseData responseData) {
         HttpServletResponse servletResponse = responseData.servletResponse;
         HttpResponse response = responseData.getResponse();
+
         servletResponse.setStatus(response.getCode().getCode());
         response.getHeaderMap().forEach((key, value) -> value.forEach(e -> servletResponse.addHeader(key, e)));
         ContentType type = response.getContentType();
         if (response.getBody() != null || (type != null && !type.isString())) {
             servletResponse.setContentType(type.getHeader());
+            Charset charset = Optional.ofNullable(response.getCharset()).orElse(this.charset);
             servletResponse.setCharacterEncoding(charset.name().toLowerCase(Locale.ROOT));
         }
         response.getCookies().forEach(servletResponse::addCookie);

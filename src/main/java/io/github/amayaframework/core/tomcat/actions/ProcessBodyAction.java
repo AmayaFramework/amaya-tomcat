@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.util.Optional;
 
 /**
  * <p>The output action during which the response body is sent.</p>
@@ -44,6 +45,7 @@ public class ProcessBodyAction extends PipelineAction<ServletResponseData, Void>
             return null;
         }
         if (type != null && type.isString()) {
+            Charset charset = Optional.ofNullable(response.getCharset()).orElse(this.charset);
             OutputStreamWriter streamWriter = new OutputStreamWriter(servletResponse.getOutputStream(), charset);
             BufferedWriter writer = new BufferedWriter(streamWriter);
             Object body = response.getBody();
