@@ -39,6 +39,7 @@ public class ProcessHeadersAction extends PipelineAction<ServletResponseData, Se
             }
         }
         response.getCookies().forEach(servletResponse::addCookie);
+        data.complete();
         return data;
     }
 }
