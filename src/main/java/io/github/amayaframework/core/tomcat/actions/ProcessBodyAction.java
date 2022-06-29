@@ -10,6 +10,7 @@ import io.github.amayaframework.http.ContentType;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedWriter;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 
@@ -26,6 +27,11 @@ public class ProcessBodyAction extends PipelineAction<ServletResponseData, Void>
         this.charset = config.getCharset();
     }
 
+    private BufferedWriter wrapStream(OutputStream stream, Charset charset) {
+        OutputStreamWriter writer = new OutputStreamWriter(stream, charset == null ? this.charset : charset);
+        return new BufferedWriter(writer);
+    }
+
     @Override
     public Void execute(ServletResponseData data) throws Throwable {
         HttpServletResponse servletResponse = data.servletResponse;
@@ -33,22 +39,18 @@ public class ProcessBodyAction extends PipelineAction<ServletResponseData, Void>
         ContentType type = response.getContentType();
         Handler<FixedOutputStream> handler = response.getOutputStreamHandler();
         if (handler != null) {
-            FixedOutputStream outputStream = new FixedOutputStream(servletResponse.getOutputStream()) {
-                @Override
-                public void specifyLength(long length) {
-                    servletResponse.setContentLengthLong(length);
-                }
-            };
-            handler.handle(outputStream);
-            outputStream.flush();
+            FixedOutputStream stream = new ServletOutputStream(servletResponse);
+            handler.handle(stream);
+            long remaining = stream.getRemainingLength();
+            if (remaining != 0) {
+                throw new IllegalStateException("Not all data has been sent, " + remaining + " bytes are left");
+            }
+            stream.flush();
             return null;
         }
         if (type != null && type.isString()) {
             Charset charset = response.getCharset();
-            OutputStreamWriter streamWriter = new OutputStreamWriter(
-                    servletResponse.getOutputStream(),
-                    charset == null ? this.charset : charset);
-            BufferedWriter writer = new BufferedWriter(streamWriter);
+            BufferedWriter writer = wrapStream(servletResponse.getOutputStream(), charset);
             Object body = response.getBody();
             if (body != null) {
                 writer.write(body.toString());
