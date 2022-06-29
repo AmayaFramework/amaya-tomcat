@@ -45,8 +45,10 @@ public class ProcessBodyAction extends PipelineAction<ServletResponseData, Void>
             return null;
         }
         if (type != null && type.isString()) {
-            Charset charset = Optional.ofNullable(response.getCharset()).orElse(this.charset);
-            OutputStreamWriter streamWriter = new OutputStreamWriter(servletResponse.getOutputStream(), charset);
+            Charset charset = response.getCharset();
+            OutputStreamWriter streamWriter = new OutputStreamWriter(
+                    servletResponse.getOutputStream(),
+                    charset == null ? this.charset : charset);
             BufferedWriter writer = new BufferedWriter(streamWriter);
             Object body = response.getBody();
             if (body != null) {
