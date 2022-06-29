@@ -14,15 +14,15 @@ import java.util.Map;
  */
 public class ParseRequestCookiesAction extends PipelineAction<ServletRequestData, ServletRequestData> {
     @Override
-    public ServletRequestData execute(ServletRequestData requestData) {
-        Cookie[] cookies = requestData.servletRequest.getCookies();
+    public ServletRequestData execute(ServletRequestData data) {
+        Cookie[] cookies = data.servletRequest.getCookies();
         Map<String, Cookie> toAdd = new HashMap<>();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 toAdd.put(cookie.getName(), cookie);
             }
         }
-        requestData.getRequest().setCookies(Collections.unmodifiableMap(toAdd));
-        return requestData;
+        data.getRequest().setCookies(Collections.unmodifiableMap(toAdd));
+        return data;
     }
 }

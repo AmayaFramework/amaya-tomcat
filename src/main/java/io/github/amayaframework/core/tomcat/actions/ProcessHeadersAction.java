@@ -9,7 +9,6 @@ import io.github.amayaframework.http.ContentType;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.Charset;
 import java.util.Locale;
-import java.util.Optional;
 
 /**
  * <p>The output action during which the response headers is sent.</p>
@@ -25,19 +24,21 @@ public class ProcessHeadersAction extends PipelineAction<ServletResponseData, Se
     }
 
     @Override
-    public ServletResponseData execute(ServletResponseData responseData) {
-        HttpServletResponse servletResponse = responseData.servletResponse;
-        HttpResponse response = responseData.getResponse();
-
+    public ServletResponseData execute(ServletResponseData data) {
+        HttpServletResponse servletResponse = data.servletResponse;
+        HttpResponse response = data.getResponse();
         servletResponse.setStatus(response.getCode().getCode());
         response.getHeaderMap().forEach((key, value) -> value.forEach(e -> servletResponse.addHeader(key, e)));
         ContentType type = response.getContentType();
-        if (response.getBody() != null || (type != null && !type.isString())) {
+        if (type != null && (response.getOutputStreamHandler() != null || response.getBody() != null)) {
             servletResponse.setContentType(type.getHeader());
-            Charset charset = Optional.ofNullable(response.getCharset()).orElse(this.charset);
-            servletResponse.setCharacterEncoding(charset.name().toLowerCase(Locale.ROOT));
+            if (type.isString()) {
+                Charset charset = response.getCharset();
+                String charsetName = (charset == null ? this.charset : charset).name().toLowerCase(Locale.ROOT);
+                servletResponse.setCharacterEncoding(charsetName);
+            }
         }
         response.getCookies().forEach(servletResponse::addCookie);
-        return responseData;
+        return data;
     }
 }

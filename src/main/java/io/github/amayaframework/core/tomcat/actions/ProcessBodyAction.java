@@ -28,9 +28,9 @@ public class ProcessBodyAction extends PipelineAction<ServletResponseData, Void>
     }
 
     @Override
-    public Void execute(ServletResponseData responseData) throws Throwable {
-        HttpServletResponse servletResponse = responseData.servletResponse;
-        HttpResponse response = responseData.getResponse();
+    public Void execute(ServletResponseData data) throws Throwable {
+        HttpServletResponse servletResponse = data.servletResponse;
+        HttpResponse response = data.getResponse();
         ContentType type = response.getContentType();
         Handler<FixedOutputStream> handler = response.getOutputStreamHandler();
         if (handler != null) {
