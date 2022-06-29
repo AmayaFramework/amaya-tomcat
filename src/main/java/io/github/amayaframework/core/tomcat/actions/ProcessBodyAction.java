@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
-import java.util.Optional;
 
 /**
  * <p>The output action during which the response body is sent.</p>
