@@ -1,5 +1,6 @@
 open module org.apache.tomcat.embed.core {
     // Base deps
+    requires transitive java.base;
     requires java.desktop;
     requires java.logging;
     requires java.rmi;
