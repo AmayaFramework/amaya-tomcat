@@ -9,6 +9,7 @@ module amayaframework.tomcat {
     // Jakarta servlets
     requires jakarta.servlet;
     // Tomcat dependencies
+    requires org.apache.tomcat.embed.core;
     // Amaya dependencies
     requires amayaframework.options;
     requires amayaframework.server;
