@@ -31,7 +31,7 @@ java {
     withJavadocJar()
 }
 
-def tomcatVersion = System.getenv('TOMCAT_CORE_VERSION') ?: '1.0.0'
+def tomcatVersion = '10.1.44'
 
 group = 'io.github.amayaframework'
 archivesBaseName = 'tomcat-embed-core'
@@ -266,6 +266,10 @@ task jar(type: Jar, overwrite: true) {
 
     from extractedClasses
     from generatedModuleInfo
+
+    manifest {
+        from("$extractedClasses/META-INF/MANIFEST.MF")
+    }
 }
 
 task sourcesJar(type: Jar, overwrite: true) {
@@ -277,6 +281,10 @@ task sourcesJar(type: Jar, overwrite: true) {
     dependsOn extractSources
 
     from extractedSources
+
+    manifest {
+        from("$extractedSources/META-INF/MANIFEST.MF")
+    }
 }
 
 def javadocDir = buildDirectory.dir("docs").dir("javadoc")
