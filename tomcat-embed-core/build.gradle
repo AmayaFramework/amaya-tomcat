@@ -27,11 +27,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
     compileJava.options.encoding('UTF-8')
     withSourcesJar()
+    withJavadocJar()
 }
 
 group = 'io.github.amayaframework'
 archivesBaseName = 'tomcat-embed-core'
-version = '10.1.44'
+version = System.getenv('TOMCAT_CORE_VERSION') ?: '1.0.0'
 
 repositories {
     mavenCentral()
@@ -271,6 +272,38 @@ task sourcesJar(type: Jar, overwrite: true) {
     dependsOn extractSources
 
     from extractedSources
+}
+
+def javadocDir = buildDirectory.dir("docs").dir("javadoc")
+def originalDocReference = "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.44/README.html"
+
+task javadocJar(type: Jar, overwrite: true) {
+    description = 'Generates a placeholder Javadoc JAR with reference to official documentation'
+    archiveClassifier = 'javadoc'
+
+    // Создаем минимальный javadoc
+    doFirst {
+        javadocDir.asFile.mkdirs()
+
+        // Создаем базовый index.html
+        def indexFile = javadocDir.file("index.html").asFile
+        indexFile.text = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Javadoc - ${project.name}</title>
+</head>
+<body>
+    <h1>${project.name} ${project.version}</h1>
+    <p>This is a repackaged version of Apache Tomcat Embed Core.</p>
+    <p>Original documentation can be found at: 
+    <a href="${originalDocReference}">Apache Tomcat API Documentation</a></p>
+</body>
+</html>
+        """.trim()
+    }
+
+    from javadocDir
 }
 
 signing {
