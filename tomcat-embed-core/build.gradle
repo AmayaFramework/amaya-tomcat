@@ -342,6 +342,14 @@ publishing {
                     connection.set('scm:https://github.com/AmayaFramework/amaya-tomcat.git')
                     developerConnection.set('scm:https://github.com/AmayaFramework/amaya-tomcat.git')
                 }
+
+                developers {
+                    developer {
+                        id.set('RomanQed')
+                        name.set('Roman Bakaldin')
+                        email.set('gbakaldin@gmail.com')
+                    }
+                }
             }
         }
     }
