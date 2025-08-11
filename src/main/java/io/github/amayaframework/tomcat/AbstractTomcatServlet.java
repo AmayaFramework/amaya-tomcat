@@ -6,9 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-final class HandledServlet implements Servlet {
+abstract class AbstractTomcatServlet implements Servlet {
     private ServletConfig config;
-    ServletHandler handler;
 
     @Override
     public void init(ServletConfig config) {
@@ -30,10 +29,12 @@ final class HandledServlet implements Servlet {
         // Do nothing
     }
 
+    protected abstract void service(HttpServletRequest req, HttpServletResponse res) throws Throwable;
+
     @Override
     public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
         try {
-            handler.handle((HttpServletRequest) req, (HttpServletResponse) res);
+            service((HttpServletRequest) req, (HttpServletResponse) res);
         } catch (Error | RuntimeException | IOException | ServletException e) {
             throw e;
         } catch (Throwable e) {

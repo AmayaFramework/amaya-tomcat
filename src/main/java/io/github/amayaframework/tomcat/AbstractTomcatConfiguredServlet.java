@@ -8,7 +8,7 @@ import io.github.amayaframework.server.PathTokenizer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-abstract class AbstractServletHandler implements ServletHandler {
+abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
     protected final HttpMethodBuffer methodBuffer;
     protected final HttpCodeBuffer codeBuffer;
     protected final HttpVersion version;
@@ -16,12 +16,12 @@ abstract class AbstractServletHandler implements ServletHandler {
     protected final MimeParser parser;
     protected final MimeFormatter formatter;
 
-    protected AbstractServletHandler(HttpMethodBuffer methodBuffer,
-                                     HttpCodeBuffer codeBuffer,
-                                     HttpVersion version,
-                                     PathTokenizer tokenizer,
-                                     MimeParser parser,
-                                     MimeFormatter formatter) {
+    protected AbstractTomcatConfiguredServlet(HttpMethodBuffer methodBuffer,
+                                    HttpCodeBuffer codeBuffer,
+                                    HttpVersion version,
+                                    PathTokenizer tokenizer,
+                                    MimeParser parser,
+                                    MimeFormatter formatter) {
         this.methodBuffer = methodBuffer;
         this.codeBuffer = codeBuffer;
         this.version = version;

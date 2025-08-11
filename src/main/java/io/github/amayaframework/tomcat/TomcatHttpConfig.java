@@ -6,6 +6,7 @@ import io.github.amayaframework.server.MimeFormatter;
 import io.github.amayaframework.server.MimeParser;
 import io.github.amayaframework.server.PathTokenizer;
 import jakarta.servlet.ServletContext;
+import org.apache.catalina.Context;
 
 import java.net.InetSocketAddress;
 import java.util.Objects;
@@ -17,13 +18,13 @@ final class TomcatHttpConfig implements HttpServerConfig {
     private static final PathTokenizer DEFAULT_TOKENIZER = new TomcatPathTokenizer();
 
     final AddressSet addresses;
-    final ServletContext context;
+    final Context context;
     HttpVersion version;
     PathTokenizer tokenizer;
     MimeParser parser;
     MimeFormatter formatter;
 
-    TomcatHttpConfig(AddressSet addresses, ServletContext context) {
+    TomcatHttpConfig(AddressSet addresses, Context context) {
         this.addresses = addresses;
         this.context = context;
         this.version = HttpVersion.HTTP_1_1;
@@ -35,7 +36,7 @@ final class TomcatHttpConfig implements HttpServerConfig {
 
     @Override
     public ServletContext servletContext() {
-        return context;
+        return context.getServletContext();
     }
 
     @Override

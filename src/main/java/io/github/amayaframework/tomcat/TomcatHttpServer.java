@@ -8,30 +8,32 @@ import io.github.amayaframework.server.HttpServer;
 import io.github.amayaframework.server.HttpServerConfig;
 import io.github.amayaframework.service.AbstractService;
 import io.github.amayaframework.service.ServiceCallback;
+import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletContext;
+import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 
 import java.net.InetSocketAddress;
 
 final class TomcatHttpServer extends AbstractService implements HttpServer {
+    private static final String SERVLET_NAME = "AmayaServlet";
+
     private final Tomcat tomcat;
     private final AddressSet addresses;
     private final TomcatHttpConfig config;
     private final HttpMethodBuffer methodBuffer;
     private final HttpCodeBuffer codeBuffer;
     private final boolean preferAsync;
-    private final HandledServlet servlet;
-    private final ServletContext context;
+    private final Context context;
     private UniRunnable1<HttpContext> runnable;
 
     TomcatHttpServer(Tomcat tomcat,
                     AddressSet addresses,
                     TomcatHttpConfig config,
-                    ServletContext context,
+                    Context context,
                     HttpMethodBuffer methodBuffer,
                     HttpCodeBuffer codeBuffer,
-                    boolean preferAsync,
-                    HandledServlet servlet) {
+                    boolean preferAsync) {
         this.tomcat = tomcat;
         this.addresses = addresses;
         this.config = config;
@@ -39,7 +41,6 @@ final class TomcatHttpServer extends AbstractService implements HttpServer {
         this.methodBuffer = methodBuffer;
         this.codeBuffer = codeBuffer;
         this.preferAsync = preferAsync;
-        this.servlet = servlet;
     }
 
     @Override
@@ -57,7 +58,7 @@ final class TomcatHttpServer extends AbstractService implements HttpServer {
 
     @Override
     public ServletContext servletContext() {
-        return context;
+        return context.getServletContext();
     }
 
     @Override
@@ -88,8 +89,8 @@ final class TomcatHttpServer extends AbstractService implements HttpServer {
         this.runnable = handler;
     }
 
-    private ServletHandler createSyncHandler() {
-        return new SyncServletHandler(
+    private Servlet createSyncServlet() {
+        return new SyncTomcatServlet(
                 methodBuffer,
                 codeBuffer,
                 config.version,
@@ -100,8 +101,8 @@ final class TomcatHttpServer extends AbstractService implements HttpServer {
         );
     }
 
-    private ServletHandler createAsyncHandler() {
-        return new AsyncServletHandler(
+    private Servlet createAsyncServlet() {
+        return new AsyncTomcatServlet(
                 methodBuffer,
                 codeBuffer,
                 config.version,
@@ -112,20 +113,20 @@ final class TomcatHttpServer extends AbstractService implements HttpServer {
         );
     }
 
-    private ServletHandler createHandler() {
+    private Servlet createServlet() {
         if (runnable == null) {
-            return (req, res) -> {};
+            return EmptyTomcatServlet.EMPTY_SERVLET;
         }
         // 1. isSync() => run()
         // 2. isAsync() => runAsync()
         // 3. isUni() / unknown => preferAsync ? runAsync() : run()
         if (runnable.isSync()) {
-            return createSyncHandler();
+            return createSyncServlet();
         }
         if (runnable.isAsync()) {
-            return createAsyncHandler();
+            return createAsyncServlet();
         }
-        return preferAsync ? createAsyncHandler() : createSyncHandler();
+        return preferAsync ? createAsyncServlet() : createSyncServlet();
     }
 
     @Override
@@ -133,7 +134,10 @@ final class TomcatHttpServer extends AbstractService implements HttpServer {
         if (token.canceled()) {
             return;
         }
-        servlet.handler = createHandler();
+        var servlet = createServlet();
+        // Register servlet to / path for generic path catch
+        tomcat.addServlet("", SERVLET_NAME, servlet);
+        context.addServletMappingDecoded("/", SERVLET_NAME);
         tomcat.start();
     }
 

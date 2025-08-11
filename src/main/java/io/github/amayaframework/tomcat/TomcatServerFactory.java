@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 public class TomcatServerFactory implements HttpServerFactory {
-    private static final String SERVLET_NAME = "AmayaServlet";
     private static final boolean JVM_21 = Runtime.version().feature() >= 21;
     private static final boolean PREFER_ASYNC = !JVM_21;
 
@@ -211,27 +210,18 @@ public class TomcatServerFactory implements HttpServerFactory {
         // Prepare bind addresses and http config
         var executorSupplier = getExecutorSupplier(set);
         var addresses = new AddressSet(tomcat.getService(), set == null ? Options.empty() : set, executorSupplier);
-        var servletContext = context.getServletContext();
-        var config = new TomcatHttpConfig(addresses, servletContext);
+        var config = new TomcatHttpConfig(addresses, context);
         if (set != null) {
             processBindOptions(addresses, set);
         }
-        // Prepare tomcat servlet
-        var methodBuffer = getMethodBuffer(set);
-        var codeBuffer = getCodeBuffer(set);
-        var servlet = new HandledServlet();
-        // Register servlet to / path for generic path catch
-        tomcat.addServlet("", SERVLET_NAME, servlet);
-        context.addServletMappingDecoded("/", SERVLET_NAME);
         return new TomcatHttpServer(
                 tomcat,
                 addresses,
                 config,
-                servletContext,
-                methodBuffer,
-                codeBuffer,
-                decideAsync(set),
-                servlet
+                context,
+                getMethodBuffer(set),
+                getCodeBuffer(set),
+                decideAsync(set)
         );
     }
 
@@ -242,21 +232,15 @@ public class TomcatServerFactory implements HttpServerFactory {
         var context = createContext(tomcat, null, env);
         // Prepare bind addresses and http config
         var addresses = new AddressSet(tomcat.getService(), Options.empty(), executorSupplier);
-        var servletContext = context.getServletContext();
-        var config = new TomcatHttpConfig(addresses, servletContext);
-        var servlet = new HandledServlet();
-        // Register servlet to / path for generic path catch
-        tomcat.addServlet("", SERVLET_NAME, servlet);
-        context.addServletMappingDecoded("/", SERVLET_NAME);
+        var config = new TomcatHttpConfig(addresses, context);
         return new TomcatHttpServer(
                 tomcat,
                 addresses,
                 config,
-                servletContext,
+                context,
                 HttpMethod::of,
                 HttpCode::of,
-                PREFER_ASYNC,
-                servlet
+                PREFER_ASYNC
         );
     }
 
