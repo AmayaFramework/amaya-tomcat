@@ -4,6 +4,7 @@ open module org.apache.tomcat.embed.core {
     requires java.desktop;
     requires java.logging;
     requires java.rmi;
+    requires java.instrument;
     requires transitive java.management;
     requires transitive java.naming;
     requires transitive java.security.jgss;

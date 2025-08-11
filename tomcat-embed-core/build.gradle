@@ -224,7 +224,7 @@ static def generateModuleDependency(ModuleVisitor mv, ModuleDependency dep) {
 
 static def generateModuleInfo(ModuleInfo info) {
     def writer = new ClassWriter(0)
-    writer.visit(Opcodes.V11, Opcodes.ACC_MODULE, "module-info", null, null, null)
+    writer.visit(Opcodes.V9, Opcodes.ACC_MODULE, "module-info", null, null, null)
     def mv = writer.visitModule(info.name, info.opened ? Opcodes.ACC_OPEN : 0, null)
     info.deps.forEach {generateModuleDependency(mv, it)}
     mv.visitEnd()
