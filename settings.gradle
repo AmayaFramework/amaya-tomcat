@@ -1,2 +1,3 @@
 rootProject.name = 'amaya-tomcat'
+include 'tomcat-embed-core'
 

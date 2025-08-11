@@ -1,0 +1,315 @@
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.ModuleVisitor
+import org.objectweb.asm.Opcodes
+
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardOpenOption
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath group: 'org.ow2.asm', name: 'asm', version: '9.8'
+    }
+}
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    compileJava.options.encoding('UTF-8')
+    withSourcesJar()
+}
+
+group = 'io.github.amayaframework'
+archivesBaseName = 'tomcat-embed-core'
+version = '10.1.44'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    sourceArtifact = [
+            group: 'org.apache.tomcat.embed',
+            name: 'tomcat-embed-core',
+            version: version
+    ]
+    packagesToRemove = ['jakarta']
+}
+
+configurations {
+    binJar {
+        transitive = false
+    }
+    srcJar {
+        transitive = false
+    }
+}
+
+dependencies {
+    binJar "${sourceArtifact.group}:${sourceArtifact.name}:${sourceArtifact.version}"
+    srcJar "${sourceArtifact.group}:${sourceArtifact.name}:${sourceArtifact.version}:sources"
+    // Tomcat annotations API
+    api group: 'org.apache.tomcat', name: 'tomcat-annotations-api', version: version
+    // Servlet API
+    api group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.0.0'
+    // Auth API
+    api group: 'jakarta.authentication', name: 'jakarta.authentication-api', version: '3.0.0'
+}
+
+static def isEmpty(Path path) {
+    if (Files.isDirectory(path)) {
+        try (var directory = Files.newDirectoryStream(path)) {
+            return !directory.iterator().hasNext();
+        }
+    }
+    return false;
+}
+
+def buildDirectory = layout.buildDirectory.get()
+def extractedClasses = buildDirectory.dir("extractedClasses")
+def extractedSources = buildDirectory.dir("extractedSources")
+
+tasks.register('extractClasses', Copy) {
+    description = 'Extracts binary jar and removes specified packages'
+
+    from {
+        configurations.binJar.collect { zipTree(it) }
+    }
+    into "${extractedClasses}"
+
+    // Exclude unwanted packages
+    exclude { fileTreeElement ->
+        def path = fileTreeElement.relativePath.pathString
+        return packagesToRemove.any { pkg ->
+            path.startsWith(pkg.replace('.', '/') + '/')
+        }
+    }
+
+    exclude 'module-info*'
+
+    doLast {
+        Files.walk(Path.of("${extractedClasses}"))
+                .filter { isEmpty(it) }
+                .forEach {Files.delete(it)}
+
+        println "Source code extracted to ${extractedClasses}"
+        println "Removed packages: ${packagesToRemove.join(', ')}"
+    }
+}
+
+tasks.register('extractSources', Copy) {
+    description = 'Extracts sources jar and removes specified packages'
+
+    from {
+        configurations.srcJar.collect { zipTree(it) }
+    }
+    into "${extractedSources}"
+
+    // Exclude unwanted packages
+    exclude { fileTreeElement ->
+        def path = fileTreeElement.relativePath.pathString
+        return packagesToRemove.any { pkg ->
+            path.startsWith(pkg.replace('.', '/') + '/')
+        }
+    }
+
+    exclude 'module-info*'
+
+    doLast {
+        Files.walk(Path.of("${extractedSources}"))
+                .filter { isEmpty(it) }
+                .forEach {Files.delete(it)}
+
+        println "Source code extracted to ${extractedSources}"
+        println "Removed packages: ${packagesToRemove.join(', ')}"
+    }
+}
+
+class ModuleDependency {
+    final String action;
+    final String[] mods;
+    final String module;
+
+    ModuleDependency(String action, String[] mods, String module) {
+        this.action = action
+        this.mods = mods
+        this.module = module
+    }
+}
+
+class ModuleInfo {
+    final boolean opened;
+    final String name;
+    final List<ModuleDependency> deps;
+
+    ModuleInfo(boolean opened, String name, List<ModuleDependency> deps) {
+        this.opened = opened
+        this.name = name
+        this.deps = deps
+    }
+}
+
+static def parseModuleLine(String line) {
+    def split = line.split(" ");
+    if (split.length < 2) {
+        throw new GradleException("Bad module-info template: dependency line must have at least two args")
+    }
+    if (split.length == 2) {
+        return new ModuleDependency(split[0], new String[0], split[1].replace(";", ""))
+    }
+    def mods = new String[split.length - 2]
+    for (var i = 1; i < split.length - 1; ++i) {
+        mods[i - 1] = split[i]
+    }
+    return new ModuleDependency(split[0], mods, split[split.length - 1].replace(";", ""))
+}
+
+static def parseModuleInfo(Path path) {
+    try (def reader = Files.newBufferedReader(path)) {
+        def first = reader.readLine().replace("{", "").strip()
+        def opened = first.startsWith("open")
+        def name = first.replace("open", "").replace("module", "").strip()
+        def deps = new LinkedList<ModuleDependency>()
+        while (true) {
+            def line = reader.readLine()
+            if (line == null) {
+                break
+            }
+            line = line.strip()
+            if (line.isEmpty() || line.startsWith("//") || line == "{" || line == "}") {
+                continue
+            }
+            deps.add(parseModuleLine(line))
+        }
+        return new ModuleInfo(opened, name, deps)
+    }
+}
+
+static def generateAccess(String[] modifiers) {
+    def ret = 0
+    for (def mod : modifiers) {
+        if (mod == "transitive") {
+            ret |= Opcodes.ACC_TRANSITIVE
+        } else if (mod == "static") {
+            ret |= Opcodes.ACC_STATIC_PHASE
+        }
+    }
+    return ret
+}
+
+static def generateModuleDependency(ModuleVisitor mv, ModuleDependency dep) {
+    def access = generateAccess(dep.mods)
+    if (dep.action == "requires") {
+        mv.visitRequire(dep.module, access, null)
+    } else if (dep.action == "exports") {
+        mv.visitExport(dep.module, access, null)
+    } else if (dep.action == "uses") {
+        mv.visitUse(dep.module)
+    }
+}
+
+static def generateModuleInfo(ModuleInfo info) {
+    def writer = new ClassWriter(0)
+    writer.visit(Opcodes.V11, Opcodes.ACC_MODULE, "module-info", null, null, null)
+    def mv = writer.visitModule(info.name, info.opened ? Opcodes.ACC_OPEN : 0, null)
+    info.deps.forEach {generateModuleDependency(mv, it)}
+    mv.visitEnd()
+    writer.visitEnd()
+    return writer.toByteArray()
+}
+
+
+def resourcesDir = layout.projectDirectory
+        .dir("src")
+        .dir("main")
+        .dir("resources")
+def sourceModuleInfo = resourcesDir.file("module-info.java")
+def generatedModuleInfo = buildDirectory.dir("generatedModuleInfo").file("module-info.class")
+
+tasks.register('generateModuleInfo') {
+    description = 'Generates module-info.class from module-info.java'
+
+    doLast {
+        def moduleInfo = parseModuleInfo(sourceModuleInfo.asFile.toPath())
+        def bytecode = generateModuleInfo(moduleInfo)
+        def targetPath = generatedModuleInfo.asFile.toPath()
+        Files.createDirectories(targetPath.parent)
+        Files.write(
+                targetPath,
+                bytecode,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING
+        )
+    }
+}
+
+task jar(type: Jar, overwrite: true) {
+    description = 'Builds main JAR from extracted classes and generated module-info'
+    archiveClassifier = ''
+    processResources.exclude('*')
+
+    dependsOn extractClasses, generateModuleInfo
+
+    from extractedClasses
+    from generatedModuleInfo
+}
+
+task sourcesJar(type: Jar, overwrite: true) {
+    description = 'Builds sources JAR from extracted sources and source module-info'
+    archiveClassifier = 'sources'
+
+    dependsOn extractSources
+
+    from extractedSources
+}
+
+signing {
+    sign publishing.publications
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            // Configure pom
+            pom {
+                name.set(archivesBaseName)
+                description.set('Repackaged Apache Tomcat Embed Core (with proper JPMS dependencies)')
+                url.set('https://github.com/AmayaFramework/amaya-tomcat')
+
+                organization {
+                    name.set('io.github.amayaframework')
+                    url.set('https://github.com/AmayaFramework')
+                }
+
+                issueManagement {
+                    system.set('GitHub')
+                    url.set('https://github.com/AmayaFramework/amaya-tomcat/issues')
+                }
+
+                licenses {
+                    license {
+                        name.set('Apache License 2.0')
+                        url.set('https://github.com/AmayaFramework/amaya-tomcat/blob/main/LICENSE')
+                    }
+                }
+
+                scm {
+                    url.set('https://github.com/AmayaFramework/amaya-tomcat')
+                    connection.set('scm:https://github.com/AmayaFramework/amaya-tomcat.git')
+                    developerConnection.set('scm:https://github.com/AmayaFramework/amaya-tomcat.git')
+                }
+            }
+        }
+    }
+}
