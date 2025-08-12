@@ -63,6 +63,10 @@ public class TomcatServerFactory implements HttpServerFactory {
         this(null, null, executorSupplier, null);
     }
 
+    public TomcatServerFactory(Path root) {
+        this(null, null, null, root);
+    }
+
     public TomcatServerFactory() {
         this(null, null, null, null);
     }
@@ -265,8 +269,7 @@ public class TomcatServerFactory implements HttpServerFactory {
 
     @Override
     public HttpServer create(OptionSet set, Environment env) {
-        var root = env == null ? getRoot() : env.root();
-        return createHttpServer(set, env, root);
+        return createHttpServer(set, env, env == null ? getRoot() : env.root());
     }
 
     @Override
@@ -276,8 +279,7 @@ public class TomcatServerFactory implements HttpServerFactory {
 
     @Override
     public HttpServer create(Environment env) {
-        var root = env == null ? getRoot() : env.root();
-        return createHttpServer(env, root);
+        return createHttpServer(env, env == null ? getRoot() : env.root());
     }
 
     @Override
