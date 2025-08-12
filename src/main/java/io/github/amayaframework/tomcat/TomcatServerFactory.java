@@ -22,6 +22,12 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.function.Supplier;
 
+/**
+ * A factory for creating {@link HttpServer} instances backed by an embedded Tomcat server.
+ * <p>
+ * Supports flexible configuration through {@link TomcatFactory}, {@link TomcatContextConfigurer},
+ * custom {@link Executor} suppliers, and a root directory for Tomcat files.
+ */
 public class TomcatServerFactory implements HttpServerFactory {
     private static final boolean JVM_21 = Runtime.version().feature() >= 21;
     private static final boolean PREFER_ASYNC = !JVM_21;
@@ -31,6 +37,14 @@ public class TomcatServerFactory implements HttpServerFactory {
     private final Supplier<Executor> executorSupplier;
     private final Path root;
 
+    /**
+     * Creates a new factory with a custom Tomcat factory, context configurer, executor supplier, and root directory.
+     *
+     * @param tomcatFactory     the {@link TomcatFactory} to create Tomcat instances
+     * @param contextConfigurer the {@link TomcatContextConfigurer} to configure created contexts
+     * @param executorSupplier  supplier of {@link Executor} for handling requests
+     * @param root              the root path for Tomcat data (can be {@code null} for default)
+     */
     public TomcatServerFactory(TomcatFactory tomcatFactory,
                                TomcatContextConfigurer contextConfigurer,
                                Supplier<Executor> executorSupplier,
@@ -41,34 +55,124 @@ public class TomcatServerFactory implements HttpServerFactory {
         this.root = root;
     }
 
+    /**
+     * Creates a new factory with a custom Tomcat factory, context configurer, and executor supplier.
+     *
+     * @param tomcatFactory     the {@link TomcatFactory} to create Tomcat instances
+     * @param contextConfigurer the {@link TomcatContextConfigurer} to configure created contexts
+     * @param executorSupplier  supplier of {@link Executor} for handling requests
+     */
     public TomcatServerFactory(TomcatFactory tomcatFactory,
                                TomcatContextConfigurer contextConfigurer,
                                Supplier<Executor> executorSupplier) {
         this(tomcatFactory, contextConfigurer, executorSupplier, null);
     }
 
+    /**
+     * Creates a new factory with a custom Tomcat factory and context configurer.
+     *
+     * @param tomcatFactory     the {@link TomcatFactory} to create Tomcat instances
+     * @param contextConfigurer the {@link TomcatContextConfigurer} to configure created contexts
+     */
     public TomcatServerFactory(TomcatFactory tomcatFactory, TomcatContextConfigurer contextConfigurer) {
         this(tomcatFactory, contextConfigurer, null, null);
     }
 
+    /**
+     * Creates a new factory with a custom Tomcat factory.
+     *
+     * @param tomcatFactory the {@link TomcatFactory} to create Tomcat instances
+     */
     public TomcatServerFactory(TomcatFactory tomcatFactory) {
         this(tomcatFactory, null, null, null);
     }
 
+    /**
+     * Creates a new factory with a custom context configurer.
+     *
+     * @param contextConfigurer the {@link TomcatContextConfigurer} to configure created contexts
+     */
     public TomcatServerFactory(TomcatContextConfigurer contextConfigurer) {
         this(null, contextConfigurer, null, null);
     }
 
+    /**
+     * Creates a new factory with a custom executor supplier.
+     *
+     * @param executorSupplier supplier of {@link Executor} for handling requests
+     */
     public TomcatServerFactory(Supplier<Executor> executorSupplier) {
         this(null, null, executorSupplier, null);
     }
 
+    /**
+     * Creates a new factory with a custom root path for Tomcat data.
+     *
+     * @param root the root path for Tomcat data
+     */
     public TomcatServerFactory(Path root) {
         this(null, null, null, root);
     }
 
+    /**
+     * Creates a new factory with default settings.
+     */
     public TomcatServerFactory() {
         this(null, null, null, null);
+    }
+
+    private static void processBindOptions(Set<InetSocketAddress> set, OptionSet options) {
+        // Add ports
+        var port = options.get(ServerOptions.PORT);
+        var ports = options.get(TomcatOptions.PORTS);
+        if (port != null) {
+            set.add(new InetSocketAddress(port));
+        }
+        if (ports != null) {
+            ports.forEach(p -> set.add(new InetSocketAddress(p)));
+        }
+        // Add ips
+        var ip = options.get(ServerOptions.IP);
+        var ips = options.get(TomcatOptions.IPS);
+        if (ip != null) {
+            set.add(ip);
+        }
+        if (ips != null) {
+            ips.forEach(set::add);
+        }
+    }
+
+    private static HttpMethodBuffer getMethodBuffer(OptionSet options) {
+        if (options == null) {
+            return HttpMethod::of;
+        }
+        var buffer = options.get(TomcatOptions.HTTP_METHOD_BUFFER);
+        if (buffer == null) {
+            return HttpMethod::of;
+        }
+        return buffer;
+    }
+
+    private static HttpCodeBuffer getCodeBuffer(OptionSet options) {
+        if (options == null) {
+            return HttpCode::of;
+        }
+        var buffer = options.get(TomcatOptions.HTTP_CODE_BUFFER);
+        if (buffer == null) {
+            return HttpCode::of;
+        }
+        return buffer;
+    }
+
+    private static boolean decideAsync(OptionSet set) {
+        if (set == null) {
+            return PREFER_ASYNC;
+        }
+        var flag = set.get(TomcatOptions.PREFER_ASYNC);
+        if (flag == null) {
+            return PREFER_ASYNC;
+        }
+        return flag;
     }
 
     private Path getRoot() {
@@ -148,60 +252,6 @@ public class TomcatServerFactory implements HttpServerFactory {
         var context = tomcat.addContext("", null);
         configureContext(context, set, env);
         return context;
-    }
-
-    private static void processBindOptions(Set<InetSocketAddress> set, OptionSet options) {
-        // Add ports
-        var port = options.get(ServerOptions.PORT);
-        var ports = options.get(TomcatOptions.PORTS);
-        if (port != null) {
-            set.add(new InetSocketAddress(port));
-        }
-        if (ports != null) {
-            ports.forEach(p -> set.add(new InetSocketAddress(p)));
-        }
-        // Add ips
-        var ip = options.get(ServerOptions.IP);
-        var ips = options.get(TomcatOptions.IPS);
-        if (ip != null) {
-            set.add(ip);
-        }
-        if (ips != null) {
-            ips.forEach(set::add);
-        }
-    }
-
-    private static HttpMethodBuffer getMethodBuffer(OptionSet options) {
-        if (options == null) {
-            return HttpMethod::of;
-        }
-        var buffer = options.get(TomcatOptions.HTTP_METHOD_BUFFER);
-        if (buffer == null) {
-            return HttpMethod::of;
-        }
-        return buffer;
-    }
-
-    private static HttpCodeBuffer getCodeBuffer(OptionSet options) {
-        if (options == null) {
-            return HttpCode::of;
-        }
-        var buffer = options.get(TomcatOptions.HTTP_CODE_BUFFER);
-        if (buffer == null) {
-            return HttpCode::of;
-        }
-        return buffer;
-    }
-
-    private static boolean decideAsync(OptionSet set) {
-        if (set == null) {
-            return PREFER_ASYNC;
-        }
-        var flag = set.get(TomcatOptions.PREFER_ASYNC);
-        if (flag == null) {
-            return PREFER_ASYNC;
-        }
-        return flag;
     }
 
     private Supplier<Executor> getExecutorSupplier() {
