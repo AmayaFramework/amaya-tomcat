@@ -47,8 +47,8 @@ final class TomcatHttpConfig implements HttpServerConfig {
     @Override
     public void httpVersion(HttpVersion version) {
         Objects.requireNonNull(version);
-        if (version.before(HttpVersion.HTTP_1_0)) {
-            throw new IllegalArgumentException("Only versions starting with HTTP/1.0 are supported");
+        if (version.before(HttpVersion.HTTP_1_1)) {
+            throw new IllegalArgumentException("Minimal allowed version is HTTP/1.1");
         }
         if (version.after(HttpVersion.HTTP_2_0)) {
             throw new IllegalArgumentException("Maximum supported http version is HTTP/2.0");
