@@ -1,6 +1,7 @@
 package io.github.amayaframework.tomcat;
 
 import com.github.romanqed.jct.CancelToken;
+import com.github.romanqed.jfunc.Runnable1;
 import com.github.romanqed.juni.UniRunnable1;
 import io.github.amayaframework.context.HttpContext;
 import io.github.amayaframework.http.HttpVersion;
@@ -25,19 +26,22 @@ final class TomcatHttpServer extends AbstractService implements HttpServer {
     private final HttpCodeBuffer codeBuffer;
     private final boolean preferAsync;
     private final Context context;
+    private final Runnable1<Context> initializer;
     private UniRunnable1<HttpContext> runnable;
 
     TomcatHttpServer(Tomcat tomcat,
-                    AddressSet addresses,
-                    TomcatHttpConfig config,
-                    Context context,
-                    HttpMethodBuffer methodBuffer,
-                    HttpCodeBuffer codeBuffer,
-                    boolean preferAsync) {
+                     AddressSet addresses,
+                     TomcatHttpConfig config,
+                     Context context,
+                     Runnable1<Context> initializer,
+                     HttpMethodBuffer methodBuffer,
+                     HttpCodeBuffer codeBuffer,
+                     boolean preferAsync) {
         this.tomcat = tomcat;
         this.addresses = addresses;
         this.config = config;
         this.context = context;
+        this.initializer = initializer;
         this.methodBuffer = methodBuffer;
         this.codeBuffer = codeBuffer;
         this.preferAsync = preferAsync;
@@ -133,6 +137,9 @@ final class TomcatHttpServer extends AbstractService implements HttpServer {
     protected void doStart(CancelToken token, ServiceCallback callback) throws Throwable {
         if (token.canceled()) {
             return;
+        }
+        if (initializer != null) {
+            initializer.run(context);
         }
         var servlet = createServlet();
         // Register servlet to / path for generic path catch

@@ -1,8 +1,10 @@
 package io.github.amayaframework.tomcat;
 
+import com.github.romanqed.jfunc.Runnable1;
 import com.github.romanqed.jtype.JType;
 import io.github.amayaframework.http.HttpVersion;
 import io.github.amayaframework.options.Key;
+import org.apache.catalina.Context;
 import org.apache.catalina.Executor;
 import org.apache.catalina.connector.Connector;
 import org.apache.tomcat.util.net.SSLHostConfig;
@@ -44,6 +46,8 @@ public final class TomcatOptions {
     public static final Key<Supplier<Executor>> EXECUTOR = Key.of("executor", new JType<>(){});
 
     public static final String EXECUTOR_PREFIX = "executor.";
+
+    public static final Key<Runnable1<Context>> CONTEXT_INITIALIZER = Key.of("ctx_initializer", new JType<>(){});
 
     /**
      * The key for the flag determines whether the server will prefer async mode.

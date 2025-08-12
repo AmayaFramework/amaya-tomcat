@@ -27,32 +27,40 @@ public class TomcatServerFactory implements HttpServerFactory {
     private static final boolean PREFER_ASYNC = !JVM_21;
 
     private final TomcatFactory tomcatFactory;
-    private final TomcatContextFactory contextFactory;
+    private final TomcatContextConfigurer contextConfigurer;
     private final Supplier<Executor> executorSupplier;
     private final Path root;
 
     public TomcatServerFactory(TomcatFactory tomcatFactory,
-                               TomcatContextFactory contextFactory,
+                               TomcatContextConfigurer contextConfigurer,
                                Supplier<Executor> executorSupplier,
                                Path root) {
         this.tomcatFactory = tomcatFactory;
-        this.contextFactory = contextFactory;
+        this.contextConfigurer = contextConfigurer;
         this.executorSupplier = executorSupplier;
         this.root = root;
     }
 
     public TomcatServerFactory(TomcatFactory tomcatFactory,
-                               TomcatContextFactory contextFactory,
+                               TomcatContextConfigurer contextConfigurer,
                                Supplier<Executor> executorSupplier) {
-        this(tomcatFactory, contextFactory, executorSupplier, null);
+        this(tomcatFactory, contextConfigurer, executorSupplier, null);
     }
 
-    public TomcatServerFactory(TomcatFactory tomcatFactory, TomcatContextFactory contextFactory) {
-        this(tomcatFactory, contextFactory, null, null);
+    public TomcatServerFactory(TomcatFactory tomcatFactory, TomcatContextConfigurer contextConfigurer) {
+        this(tomcatFactory, contextConfigurer, null, null);
     }
 
     public TomcatServerFactory(TomcatFactory tomcatFactory) {
         this(tomcatFactory, null, null, null);
+    }
+
+    public TomcatServerFactory(TomcatContextConfigurer contextConfigurer) {
+        this(null, contextConfigurer, null, null);
+    }
+
+    public TomcatServerFactory(Supplier<Executor> executorSupplier) {
+        this(null, null, executorSupplier, null);
     }
 
     public TomcatServerFactory() {
@@ -89,7 +97,7 @@ public class TomcatServerFactory implements HttpServerFactory {
         return tomcatFactory.create(options, env);
     }
 
-    private static void configureContext(Context context, OptionSet set) {
+    private void configureContext(Context context, OptionSet set, Environment env) {
         context.setUseHttpOnly(true);
         context.setAlwaysAccessSession(false);
         context.setXmlValidation(false);
@@ -122,18 +130,19 @@ public class TomcatServerFactory implements HttpServerFactory {
             standardContext.setClearReferencesRmiTargets(false);
             standardContext.setClearReferencesThreadLocals(false);
         }
+        if (contextConfigurer != null) {
+            if (env == null) {
+                contextConfigurer.configure(context, set);
+            } else {
+                contextConfigurer.configure(context, set, env);
+            }
+        }
         context.setConfigured(true);
     }
 
     private Context createContext(Tomcat tomcat, OptionSet set, Environment env) {
-        if (contextFactory != null) {
-            if (env == null) {
-                return contextFactory.create(tomcat, set);
-            }
-            return contextFactory.create(tomcat, set, env);
-        }
         var context = tomcat.addContext("", null);
-        configureContext(context, set);
+        configureContext(context, set, env);
         return context;
     }
 
@@ -221,11 +230,13 @@ public class TomcatServerFactory implements HttpServerFactory {
         if (set != null) {
             processBindOptions(addresses, set);
         }
+        var initializer = set == null ? null : set.get(TomcatOptions.CONTEXT_INITIALIZER);
         return new TomcatHttpServer(
                 tomcat,
                 addresses,
                 config,
                 context,
+                initializer,
                 getMethodBuffer(set),
                 getCodeBuffer(set),
                 decideAsync(set)
@@ -245,6 +256,7 @@ public class TomcatServerFactory implements HttpServerFactory {
                 addresses,
                 config,
                 context,
+                null,
                 HttpMethod::of,
                 HttpCode::of,
                 PREFER_ASYNC
