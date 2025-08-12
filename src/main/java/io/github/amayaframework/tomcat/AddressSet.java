@@ -1,5 +1,6 @@
 package io.github.amayaframework.tomcat;
 
+import com.github.romanqed.jfunc.Exceptions;
 import io.github.amayaframework.http.HttpVersion;
 import io.github.amayaframework.options.OptionSet;
 import org.apache.catalina.Executor;
@@ -103,6 +104,11 @@ final class AddressSet implements Set<InetSocketAddress> {
         var connector = connectors.remove(o);
         service.removeConnector(connector);
         executors.remove((InetSocketAddress) o);
+        try {
+            connector.destroy();
+        } catch (Throwable e) {
+            Exceptions.throwAny(e);
+        }
         return true;
     }
 
@@ -214,10 +220,16 @@ final class AddressSet implements Set<InetSocketAddress> {
             if (current == null) {
                 throw new IllegalStateException();
             }
-            service.removeConnector(current.getValue());
+            var connector = current.getValue();
+            service.removeConnector(connector);
             executors.remove(current.getKey());
             iterator.remove();
             current = null;
+            try {
+                connector.destroy();
+            } catch (Throwable e) {
+                Exceptions.throwAny(e);
+            }
         }
     }
 }
