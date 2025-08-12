@@ -26,9 +26,8 @@ final class AsyncTomcatServlet extends AbstractTomcatConfiguredServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse res) throws Throwable {
         var asyncCtx = req.startAsync();
-        HttpContext context;
         try {
-            context = buildContext(
+            var context = buildContext(
                     (HttpServletRequest) asyncCtx.getRequest(),
                     (HttpServletResponse) asyncCtx.getResponse()
             );
@@ -36,10 +35,10 @@ final class AsyncTomcatServlet extends AbstractTomcatConfiguredServlet {
                 asyncCtx.complete();
                 return;
             }
+            handler.runAsync(context).whenComplete((v, t) -> asyncCtx.complete());
         } catch (Throwable e) {
             asyncCtx.complete();
             throw e;
         }
-        handler.runAsync(context).whenComplete((v, t) -> asyncCtx.complete());
     }
 }
