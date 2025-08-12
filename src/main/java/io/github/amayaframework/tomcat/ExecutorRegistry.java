@@ -29,6 +29,9 @@ final class ExecutorRegistry {
 
     void remove(InetSocketAddress address) {
         var executor = executors.remove(address);
+        if (executor == null) {
+            return;
+        }
         var num = count.get(executor);
         if (num == 1) {
             count.remove(executor);
