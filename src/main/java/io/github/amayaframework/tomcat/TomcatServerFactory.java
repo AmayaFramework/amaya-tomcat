@@ -191,13 +191,20 @@ public class TomcatServerFactory implements HttpServerFactory {
         return flag;
     }
 
+    private Supplier<Executor> getExecutorSupplier() {
+        if (executorSupplier == null && JVM_21) {
+            return VirtualThreadExecutor::new;
+        }
+        return executorSupplier;
+    }
+
     private Supplier<Executor> getExecutorSupplier(OptionSet set) {
         if (set == null) {
-            return executorSupplier;
+            return getExecutorSupplier();
         }
         var ret = set.get(TomcatOptions.EXECUTOR);
         if (ret == null) {
-            return executorSupplier;
+            return getExecutorSupplier();
         }
         return ret;
     }
@@ -231,7 +238,7 @@ public class TomcatServerFactory implements HttpServerFactory {
         // Create context
         var context = createContext(tomcat, null, env);
         // Prepare bind addresses and http config
-        var addresses = new AddressSet(tomcat.getService(), Options.empty(), executorSupplier);
+        var addresses = new AddressSet(tomcat.getService(), Options.empty(), getExecutorSupplier());
         var config = new TomcatHttpConfig(addresses, context);
         return new TomcatHttpServer(
                 tomcat,
