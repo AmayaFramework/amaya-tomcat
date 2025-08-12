@@ -13,6 +13,10 @@ import java.net.InetSocketAddress;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+/**
+ * Contains constants for Tomcat-specific {@link io.github.amayaframework.options.OptionSet} keys
+ * and utility methods for constructing option keys and names.
+ */
 public final class TomcatOptions {
     private TomcatOptions() {
     }
@@ -43,10 +47,30 @@ public final class TomcatOptions {
      */
     public static final String SSL_CONFIG_PREFIX = "ssl.";
 
+    /**
+     * Option key for supplying an {@link Executor} factory used by connectors.
+     *
+     * <p>Expected value type: {@link Supplier} of {@link Executor}. When set, this supplier
+     * is used to create the executor for server connectors. For per-address executors use
+     * {@link #executorKey(InetSocketAddress)} / {@link #executorStringKey(InetSocketAddress)}.
+     */
     public static final Key<Supplier<Executor>> EXECUTOR = Key.of("executor", new JType<>(){});
 
+    /**
+     * Prefix for option keys that refer to per-address executor suppliers.
+     *
+     * <p>Used by {@link #executorStringKey(InetSocketAddress)} and {@link #executorKey(InetSocketAddress)}
+     * to build full option keys for binding executors to specific addresses.
+     */
     public static final String EXECUTOR_PREFIX = "executor.";
 
+    /**
+     * Option key for a context initialization callback.
+     *
+     * <p>Expected value type: {@link Runnable1} of {@link Context}. If provided, the callback
+     * is executed after a {@link Context} is created and configured, allowing additional
+     * programmatic customization (for example registering servlets, filters or attributes).
+     */
     public static final Key<Runnable1<Context>> CONTEXT_INITIALIZER = Key.of("ctx_initializer", new JType<>(){});
 
     /**
@@ -83,50 +107,126 @@ public final class TomcatOptions {
             new JType<>(){}
     );
 
+    /**
+     * Creates an SSL configuration option key string for the given address.
+     *
+     * @param address the bind address
+     * @return the SSL config key string
+     */
     public static String sslStringKey(InetSocketAddress address) {
         return SSL_CONFIG_PREFIX + address.getHostString() + ":" + address.getPort();
     }
 
+    /**
+     * Creates an SSL configuration option key string for the given host and port.
+     *
+     * @param host the hostname
+     * @param port the port number
+     * @return the SSL config key string
+     */
     public static String sslStringKey(String host, int port) {
         return SSL_CONFIG_PREFIX + host + ":" + port;
     }
 
+    /**
+     * Creates an SSL configuration option key string for the given port on all interfaces.
+     *
+     * @param port the port number
+     * @return the SSL config key string
+     */
     public static String sslStringKey(int port) {
         return SSL_CONFIG_PREFIX + "0.0.0.0:" + port;
     }
 
+    /**
+     * Creates an {@link Key} for the SSL configuration bound to the given address.
+     *
+     * @param address the bind address
+     * @return the SSL config key
+     */
     public static Key<SSLHostConfig> sslKey(InetSocketAddress address) {
         return Key.of(sslStringKey(address), SSLHostConfig.class);
     }
 
+    /**
+     * Creates an {@link Key} for the SSL configuration bound to the given host and port.
+     *
+     * @param host the hostname
+     * @param port the port number
+     * @return the SSL config key
+     */
     public static Key<SSLHostConfig> sslKey(String host, int port) {
         return Key.of(sslStringKey(host, port), SSLHostConfig.class);
     }
 
+    /**
+     * Creates an {@link Key} for the SSL configuration bound to the given port on all interfaces.
+     *
+     * @param port the port number
+     * @return the SSL config key
+     */
     public static Key<SSLHostConfig> sslKey(int port) {
         return Key.of(sslStringKey(port), SSLHostConfig.class);
     }
 
+    /**
+     * Creates an executor option key string for the given address.
+     *
+     * @param address the bind address
+     * @return the executor key string
+     */
     public static String executorStringKey(InetSocketAddress address) {
         return EXECUTOR_PREFIX + address.getHostString() + ":" + address.getPort();
     }
 
+    /**
+     * Creates an executor option key string for the given host and port.
+     *
+     * @param host the hostname
+     * @param port the port number
+     * @return the executor key string
+     */
     public static String executorStringKey(String host, int port) {
         return EXECUTOR_PREFIX + host + ":" + port;
     }
 
+    /**
+     * Creates an executor option key string for the given port on all interfaces.
+     *
+     * @param port the port number
+     * @return the executor key string
+     */
     public static String executorStringKey(int port) {
         return EXECUTOR_PREFIX + "0.0.0.0:" + port;
     }
 
+    /**
+     * Creates an {@link Key} for an executor bound to the given address.
+     *
+     * @param address the bind address
+     * @return the executor key
+     */
     public static Key<Supplier<Executor>> executorKey(InetSocketAddress address) {
         return Key.of(executorStringKey(address), new JType<>(){});
     }
 
+    /**
+     * Creates an {@link Key} for an executor bound to the given host and port.
+     *
+     * @param host the hostname
+     * @param port the port number
+     * @return the executor key
+     */
     public static Key<Supplier<Executor>> executorKey(String host, int port) {
         return Key.of(executorStringKey(host, port), new JType<>(){});
     }
 
+    /**
+     * Creates an {@link Key} for an executor bound to the given port on all interfaces.
+     *
+     * @param port the port number
+     * @return the executor key
+     */
     public static Key<Supplier<Executor>> executorKey(int port) {
         return Key.of(executorStringKey(port), new JType<>(){});
     }
