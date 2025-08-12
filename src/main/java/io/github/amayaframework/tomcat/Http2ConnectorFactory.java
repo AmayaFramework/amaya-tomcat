@@ -13,14 +13,15 @@ final class Http2ConnectorFactory implements ConnectorFactory {
 
     @Override
     public Connector create(Executor executor, InetSocketAddress address, OptionSet options) {
-        var ret = new Connector(new Http11NioProtocol());
+        var protocol = new Http11NioProtocol();
+        var ret = new Connector(protocol);
         if (executor != null) {
             ret.getProtocolHandler().setExecutor(executor);
         }
         ret.setXpoweredBy(true);
         ret.addUpgradeProtocol(new Http2Protocol());
         Util.setAddress(ret, address);
-        Util.configureSSL(ret, address, options);
+        Util.configureSSL(ret, protocol, address, options);
         Util.configureConnector(ret, HttpVersion.HTTP_2_0, options);
         return ret;
     }

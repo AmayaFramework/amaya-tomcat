@@ -12,13 +12,14 @@ final class Http1ConnectorFactory implements ConnectorFactory {
 
     @Override
     public Connector create(Executor executor, InetSocketAddress address, OptionSet options) {
-        var ret = new Connector(new Http11NioProtocol());
+        var protocol = new Http11NioProtocol();
+        var ret = new Connector(protocol);
         if (executor != null) {
             ret.getProtocolHandler().setExecutor(executor);
         }
         ret.setXpoweredBy(true);
         Util.setAddress(ret, address);
-        Util.configureSSL(ret, address, options);
+        Util.configureSSL(ret, protocol, address, options);
         Util.configureConnector(ret, HttpVersion.HTTP_1_1, options);
         return ret;
     }
