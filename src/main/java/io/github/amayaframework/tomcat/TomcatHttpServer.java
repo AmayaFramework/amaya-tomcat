@@ -147,8 +147,10 @@ final class TomcatHttpServer extends AbstractService implements HttpServer {
         }
         var servlet = createServlet();
         // Register servlet to / path for generic path catch
-        tomcat.addServlet("", SERVLET_NAME, servlet);
-        context.addServletMappingDecoded("/", SERVLET_NAME);
+        var wrapper = new ServletWrapper(servlet);
+        wrapper.setName(SERVLET_NAME);
+        context.addChild(wrapper);
+        wrapper.addMapping("/");
         tomcat.start();
     }
 
