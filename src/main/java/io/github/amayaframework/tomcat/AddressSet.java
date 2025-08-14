@@ -117,7 +117,6 @@ final class AddressSet implements Set<InetSocketAddress> {
 
     @Override
     public boolean addAll(Collection<? extends InetSocketAddress> c) {
-        Objects.requireNonNull(c);
         var ret = false;
         for (var address : c) {
             ret |= add(address);
@@ -132,7 +131,6 @@ final class AddressSet implements Set<InetSocketAddress> {
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        Objects.requireNonNull(c);
         boolean ret = false;
         var iterator = connectors.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -149,7 +147,6 @@ final class AddressSet implements Set<InetSocketAddress> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        Objects.requireNonNull(c);
         var ret = false;
         for (var address : c) {
             ret |= remove(address);
