@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -198,6 +200,17 @@ public class TomcatServerFactory implements HttpServerFactory {
         };
     }
 
+    private static void configureManager(StandardManager manager) {
+        manager.setPathname(null);
+        try {
+            var random = SecureRandom.getInstanceStrong();
+            manager.setSessionIdGenerator(new StrongIdGenerator(random));
+        } catch (NoSuchAlgorithmException e) {
+            // Default fallback
+            manager.setSecureRandomAlgorithm("DRBG");
+        }
+    }
+
     private Path getRoot() {
         if (root == null) {
             return Path.of(".").toAbsolutePath().normalize();
@@ -243,8 +256,12 @@ public class TomcatServerFactory implements HttpServerFactory {
         context.setIgnoreAnnotations(true);
         context.setJarScanner(new NoopJarScanner());
         var manager = context.getManager();
-        if (manager instanceof StandardManager) {
-            ((StandardManager) manager).setPathname(null);
+        if (manager == null) {
+            var sm = new StandardManager();
+            configureManager(sm);
+            context.setManager(sm);
+        } else if (manager instanceof StandardManager) {
+            configureManager((StandardManager) manager);
         }
         var cookies = set != null && set.asKey(TomcatOptions.USE_SESSION_COOKIES);
         if (!cookies) {
