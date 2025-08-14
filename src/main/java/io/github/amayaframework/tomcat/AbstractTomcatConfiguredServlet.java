@@ -1,10 +1,13 @@
 package io.github.amayaframework.tomcat;
 
+import com.github.romanqed.jfunc.Runnable0;
+import com.github.romanqed.jfunc.Runnable1;
 import io.github.amayaframework.context.HttpContext;
 import io.github.amayaframework.http.HttpVersion;
 import io.github.amayaframework.server.MimeFormatter;
 import io.github.amayaframework.server.MimeParser;
 import io.github.amayaframework.server.PathTokenizer;
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -16,12 +19,15 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
     protected final MimeParser parser;
     protected final MimeFormatter formatter;
 
-    protected AbstractTomcatConfiguredServlet(HttpMethodBuffer methodBuffer,
-                                    HttpCodeBuffer codeBuffer,
-                                    HttpVersion version,
-                                    PathTokenizer tokenizer,
-                                    MimeParser parser,
-                                    MimeFormatter formatter) {
+    protected AbstractTomcatConfiguredServlet(Runnable1<ServletConfig> onInit,
+                                              Runnable0 onDestroy,
+                                              HttpMethodBuffer methodBuffer,
+                                              HttpCodeBuffer codeBuffer,
+                                              HttpVersion version,
+                                              PathTokenizer tokenizer,
+                                              MimeParser parser,
+                                              MimeFormatter formatter) {
+        super(onInit, onDestroy);
         this.methodBuffer = methodBuffer;
         this.codeBuffer = codeBuffer;
         this.version = version;

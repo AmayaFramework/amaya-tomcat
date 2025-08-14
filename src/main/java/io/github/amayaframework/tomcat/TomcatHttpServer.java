@@ -95,6 +95,8 @@ final class TomcatHttpServer extends AbstractService implements HttpServer {
 
     private Servlet createSyncServlet() {
         return new SyncTomcatServlet(
+                config.onInit,
+                config.onDestroy,
                 methodBuffer,
                 codeBuffer,
                 config.version,
@@ -107,6 +109,8 @@ final class TomcatHttpServer extends AbstractService implements HttpServer {
 
     private Servlet createAsyncServlet() {
         return new AsyncTomcatServlet(
+                config.onInit,
+                config.onDestroy,
                 methodBuffer,
                 codeBuffer,
                 config.version,
@@ -119,7 +123,7 @@ final class TomcatHttpServer extends AbstractService implements HttpServer {
 
     private Servlet createServlet() {
         if (runnable == null) {
-            return EmptyTomcatServlet.EMPTY_SERVLET;
+            return new EmptyTomcatServlet(config.onInit, config.onDestroy);
         }
         // 1. isSync() => run()
         // 2. isAsync() => runAsync()

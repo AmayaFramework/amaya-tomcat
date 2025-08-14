@@ -1,10 +1,13 @@
 package io.github.amayaframework.tomcat;
 
+import com.github.romanqed.jfunc.Runnable0;
+import com.github.romanqed.jfunc.Runnable1;
 import io.github.amayaframework.http.HttpVersion;
 import io.github.amayaframework.server.HttpServerConfig;
 import io.github.amayaframework.server.MimeFormatter;
 import io.github.amayaframework.server.MimeParser;
 import io.github.amayaframework.server.PathTokenizer;
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import org.apache.catalina.Context;
 
@@ -19,6 +22,8 @@ final class TomcatHttpConfig implements HttpServerConfig {
 
     final AddressSet addresses;
     final Context context;
+    Runnable1<ServletConfig> onInit;
+    Runnable0 onDestroy;
     HttpVersion version;
     PathTokenizer tokenizer;
     MimeParser parser;
@@ -37,6 +42,26 @@ final class TomcatHttpConfig implements HttpServerConfig {
     @Override
     public ServletContext servletContext() {
         return context.getServletContext();
+    }
+
+    @Override
+    public Runnable1<ServletConfig> onServletInit() {
+        return onInit;
+    }
+
+    @Override
+    public Runnable0 onServletDestroy() {
+        return onDestroy;
+    }
+
+    @Override
+    public void onServletInit(Runnable1<ServletConfig> action) {
+        this.onInit = action;
+    }
+
+    @Override
+    public void onServletDestroy(Runnable0 action) {
+        this.onDestroy = action;
     }
 
     @Override
