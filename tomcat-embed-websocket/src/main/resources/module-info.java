@@ -8,8 +8,8 @@ open module org.apache.tomcat.embed.websocket {
     exports org.apache.tomcat.websocket.server;
 
     uses jakarta.websocket.ContainerProvider;
-    uses jakarta.websocket.server.ServerEndpointConfig.Configurator;
+    uses jakarta.websocket.server.ServerEndpointConfig$Configurator;
 
     provides jakarta.websocket.ContainerProvider with org.apache.tomcat.websocket.WsContainerProvider;
-    provides jakarta.websocket.server.ServerEndpointConfig.Configurator with org.apache.tomcat.websocket.server.DefaultServerEndpointConfigurator;
+    provides jakarta.websocket.server.ServerEndpointConfig$Configurator with org.apache.tomcat.websocket.server.DefaultServerEndpointConfigurator;
 }
