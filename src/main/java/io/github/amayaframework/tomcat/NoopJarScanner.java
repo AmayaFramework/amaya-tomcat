@@ -7,8 +7,6 @@ import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.JarScannerCallback;
 
 public final class NoopJarScanner implements JarScanner {
-    public static final JarScanner NOOP_JAR_SCANNER = new NoopJarScanner();
-
     private JarScanFilter filter;
 
     @Override

@@ -218,7 +218,7 @@ public class TomcatServerFactory implements HttpServerFactory {
         context.setValidateClientProvidedNewSessionId(false);
         context.setJspConfigDescriptor(null);
         context.setIgnoreAnnotations(true);
-        context.setJarScanner(NoopJarScanner.NOOP_JAR_SCANNER);
+        context.setJarScanner(new NoopJarScanner());
         var manager = context.getManager();
         if (manager instanceof StandardManager) {
             ((StandardManager) manager).setPathname(null);
