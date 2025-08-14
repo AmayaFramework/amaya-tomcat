@@ -50,13 +50,13 @@ final class TomcatHttpConfig implements HttpServerConfig {
     }
 
     @Override
-    public Runnable0 onServletDestroy() {
-        return onDestroy;
+    public void onServletInit(Runnable1<ServletConfig> action) {
+        this.onInit = action;
     }
 
     @Override
-    public void onServletInit(Runnable1<ServletConfig> action) {
-        this.onInit = action;
+    public Runnable0 onServletDestroy() {
+        return onDestroy;
     }
 
     @Override
