@@ -1,6 +1,7 @@
 package io.github.amayaframework.tomcat;
 
 import com.github.romanqed.jfunc.Exceptions;
+import com.github.romanqed.jfunc.Runnable1;
 import io.github.amayaframework.environment.Environment;
 import io.github.amayaframework.http.HttpCode;
 import io.github.amayaframework.http.HttpMethod;
@@ -14,6 +15,7 @@ import org.apache.catalina.Executor;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.session.StandardManager;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.websocket.server.WsSci;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -175,6 +177,24 @@ public class TomcatServerFactory implements HttpServerFactory {
         return flag;
     }
 
+    private static Runnable1<Context> getInitializer(OptionSet options) {
+        if (options == null) {
+            return null;
+        }
+        var initializer = options.get(TomcatOptions.CONTEXT_INITIALIZER);
+        var websocket = options.asKey(TomcatOptions.ENABLE_WEBSOCKET);
+        if (!websocket) {
+            return initializer;
+        }
+        if (initializer == null) {
+            return ctx -> ctx.addServletContainerInitializer(new WsSci(), null);
+        }
+        return ctx -> {
+            ctx.addServletContainerInitializer(new WsSci(), null);
+            initializer.run(ctx);
+        };
+    }
+
     private Path getRoot() {
         if (root == null) {
             return Path.of(".").toAbsolutePath().normalize();
@@ -284,13 +304,12 @@ public class TomcatServerFactory implements HttpServerFactory {
         if (set != null) {
             processBindOptions(addresses, set);
         }
-        var initializer = set == null ? null : set.get(TomcatOptions.CONTEXT_INITIALIZER);
         return new TomcatHttpServer(
                 tomcat,
                 addresses,
                 config,
                 context,
-                initializer,
+                getInitializer(set),
                 getMethodBuffer(set),
                 getCodeBuffer(set),
                 decideAsync(set)

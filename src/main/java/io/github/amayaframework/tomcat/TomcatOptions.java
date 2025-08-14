@@ -36,6 +36,13 @@ public final class TomcatOptions {
     public static final Key<Iterable<InetSocketAddress>> IPS = Key.of("ips", new JType<>(){});
 
     /**
+     * The key for the flag determines whether the server will support websocket protocol.
+     * <br>
+     * Required type: {@link Boolean}.
+     */
+    public static final String ENABLE_WEBSOCKET = "enable_ws";
+
+    /**
      * The key for the flag determines whether the server will use cookies for http sessions.
      * <br>
      * Required type: {@link Boolean}.

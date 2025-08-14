@@ -25,10 +25,7 @@ repositories {
 
 dependencies {
     // TODO REMOVE Core dep
-    implementation group: 'jakarta.websocket', name: 'jakarta.websocket-api', version: '2.1.1'
-    implementation group: 'jakarta.websocket', name: 'jakarta.websocket-client-api', version: '2.1.1'
     implementation group: 'io.github.amayaframework', name: 'amaya-core', version: '3.1.0'
-    implementation files('tomcat-embed-websocket-10.1.44.jar')
     // Tests
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.0'
@@ -39,8 +36,10 @@ dependencies {
     compileOnly group: 'io.github.amayaframework', name: 'amaya-service', version: '2.0.0'
     compileOnly group: 'io.github.amayaframework', name: 'amaya-context', version: '2.0.0'
     compileOnly group: 'io.github.amayaframework', name: 'amaya-server', version: '2.1.0'
-    // Tomcat
+    // Tomcat core
     api group: 'io.github.amayaframework', name: 'tomcat-embed-core', version: '10.1.44-4'
+    // Tomcat websockets
+    compileOnly group: 'io.github.amayaframework', name: 'tomcat-embed-websocket', version: '10.1.44'
 }
 
 test {
