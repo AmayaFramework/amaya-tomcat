@@ -64,6 +64,7 @@ dependencies {
     srcJar "${sourceArtifact.group}:${sourceArtifact.name}:${sourceArtifact.version}:sources"
     // Websocket API
     api group: 'jakarta.websocket', name: 'jakarta.websocket-api', version: '2.1.1'
+    api group: 'jakarta.websocket', name: 'jakarta.websocket-client-api', version: '2.1.1'
     // Tomcat Core
     compileOnly group: 'io.github.amayaframework', name: 'tomcat-embed-core', version: '10.1.44-4'
 }
