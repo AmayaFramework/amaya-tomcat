@@ -95,20 +95,23 @@ final class AddressSet implements Set<InetSocketAddress> {
         return connectors.containsKey(o);
     }
 
-    @Override
-    @SuppressWarnings("SuspiciousMethodCalls")
-    public boolean remove(Object o) {
-        if (!connectors.containsKey(o)) {
-            return false;
-        }
-        var connector = connectors.remove(o);
+    private void removeConnector(Connector connector, InetSocketAddress address) {
         service.removeConnector(connector);
-        executors.remove((InetSocketAddress) o);
+        executors.remove(address);
         try {
             connector.destroy();
         } catch (Throwable e) {
             Exceptions.throwAny(e);
         }
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        var connector = connectors.remove(o);
+        if (connector == null) {
+            return false;
+        }
+        removeConnector(connector, (InetSocketAddress) o);
         return true;
     }
 
@@ -130,11 +133,14 @@ final class AddressSet implements Set<InetSocketAddress> {
     @Override
     public boolean retainAll(Collection<?> c) {
         Objects.requireNonNull(c);
-        var ret = false;
-        var keys = connectors.keySet();
-        for (var address : keys) {
+        boolean ret = false;
+        var iterator = connectors.entrySet().iterator();
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+            var address = entry.getKey();
             if (!c.contains(address)) {
-                remove(address);
+                iterator.remove();
+                removeConnector(entry.getValue(), address);
                 ret = true;
             }
         }
@@ -195,6 +201,24 @@ final class AddressSet implements Set<InetSocketAddress> {
         return connectors.keySet().spliterator();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Set)) {
+            return false;
+        }
+        return connectors.keySet().equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return connectors.keySet().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return connectors.keySet().toString();
+    }
+
     private final class AddressIterator implements Iterator<InetSocketAddress> {
         private final Iterator<Map.Entry<InetSocketAddress, Connector>> iterator;
         private Map.Entry<InetSocketAddress, Connector> current;
@@ -220,16 +244,11 @@ final class AddressSet implements Set<InetSocketAddress> {
             if (current == null) {
                 throw new IllegalStateException();
             }
-            var connector = current.getValue();
-            service.removeConnector(connector);
-            executors.remove(current.getKey());
             iterator.remove();
+            var connector = current.getValue();
+            var address = current.getKey();
             current = null;
-            try {
-                connector.destroy();
-            } catch (Throwable e) {
-                Exceptions.throwAny(e);
-            }
+            removeConnector(connector, address);
         }
     }
 }
