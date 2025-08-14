@@ -186,6 +186,9 @@ public class TomcatServerFactory implements HttpServerFactory {
         if (!websocket) {
             return initializer;
         }
+        if (!LookupUtil.isWebsocketLoaded()) {
+            throw new IllegalArgumentException("Websocket is requested, but the required dependencies is not loaded");
+        }
         if (initializer == null) {
             return ctx -> ctx.addServletContainerInitializer(new WsSci(), null);
         }
