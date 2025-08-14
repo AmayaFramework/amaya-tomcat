@@ -244,9 +244,9 @@ final class AddressSet implements Set<InetSocketAddress> {
             if (current == null) {
                 throw new IllegalStateException();
             }
-            iterator.remove();
             var connector = current.getValue();
             var address = current.getKey();
+            iterator.remove();
             current = null;
             removeConnector(connector, address);
         }
