@@ -52,6 +52,9 @@ final class AddressSet implements Set<InetSocketAddress> {
             return ensureDefaultExecutor();
         }
         var ret = found.get();
+        if (ret == null) {
+            return ensureDefaultExecutor();
+        }
         executors.add(address, ret);
         return ret;
     }
