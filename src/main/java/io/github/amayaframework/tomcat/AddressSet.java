@@ -63,8 +63,8 @@ final class AddressSet implements Set<InetSocketAddress> {
 
     void add(InetSocketAddress address, HttpVersion version) {
         Objects.requireNonNull(address);
-        if (version.before(HttpVersion.HTTP_1_0)) {
-            throw new IllegalArgumentException("Only versions starting with HTTP/1.0 are supported");
+        if (version.before(HttpVersion.HTTP_1_1)) {
+            throw new IllegalArgumentException("Minimal allowed version is HTTP/1.1");
         }
         if (version.after(this.version)) {
             throw new IllegalArgumentException("Maximum allowed http version is " + this.version);
