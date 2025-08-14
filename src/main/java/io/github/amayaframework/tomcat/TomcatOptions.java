@@ -7,10 +7,13 @@ import io.github.amayaframework.options.Key;
 import org.apache.catalina.Context;
 import org.apache.catalina.Executor;
 import org.apache.catalina.connector.Connector;
+import org.apache.coyote.http11.Http11NioProtocol;
+import org.apache.coyote.http2.Http2Protocol;
 import org.apache.tomcat.util.net.SSLHostConfig;
 
 import java.net.InetSocketAddress;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -111,6 +114,30 @@ public final class TomcatOptions {
      */
     public static final Key<BiConsumer<HttpVersion, Connector>> CONNECTOR_CONFIGURER = Key.of(
             "connector_configurer",
+            new JType<>(){}
+    );
+
+    /**
+     * The key for the HTTP/1.1 protocol configurer option.
+     *
+     * <p>Required type: {@link Consumer} of {@link Http11NioProtocol}.
+     * This option allows customization of the low-level {@link Http11NioProtocol}
+     * instance used by Tomcat connectors for handling HTTP/1.1 traffic.
+     */
+    public static final Key<Consumer<Http11NioProtocol>> HTTP1_CONFIGURER = Key.of(
+            "http1_configurer",
+            new JType<>(){}
+    );
+
+    /**
+     * The key for the HTTP/2 protocol configurer option.
+     *
+     * <p>Required type: {@link Consumer} of {@link Http2Protocol}.
+     * This option allows customization of the low-level {@link Http2Protocol}
+     * instance used by Tomcat connectors for handling HTTP/2 traffic.
+     */
+    public static final Key<Consumer<Http2Protocol>> HTTP2_CONFIGURER = Key.of(
+            "http2_configurer",
             new JType<>(){}
     );
 

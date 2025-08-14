@@ -19,9 +19,12 @@ final class Http2ConnectorFactory implements ConnectorFactory {
             ret.getProtocolHandler().setExecutor(executor);
         }
         ret.setXpoweredBy(true);
-        ret.addUpgradeProtocol(new Http2Protocol());
+        var http2 = new Http2Protocol();
+        ret.addUpgradeProtocol(http2);
+        Util.configureHttp2(http2, options);
         Util.setAddress(ret, address);
         Util.configureSSL(ret, protocol, address, options);
+        Util.configureHttp1(protocol, options);
         Util.configureConnector(ret, HttpVersion.HTTP_2_0, options);
         return ret;
     }
