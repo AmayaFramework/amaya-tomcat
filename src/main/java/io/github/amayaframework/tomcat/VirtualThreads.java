@@ -8,7 +8,7 @@ final class VirtualThreads {
     private VirtualThreads() {
     }
 
-    public static ExecutorService getNamedVirtualThreadsExecutor(String namePrefix) {
+    static ExecutorService getNamedVirtualThreadsExecutor(String namePrefix) {
         try {
             var builderClass = Class.forName("java.lang.Thread$Builder");
             var threadBuilder = Thread.class.getMethod("ofVirtual").invoke(null);
