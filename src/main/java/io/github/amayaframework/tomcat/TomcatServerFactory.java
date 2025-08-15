@@ -12,16 +12,17 @@ import io.github.amayaframework.server.HttpServerFactory;
 import io.github.amayaframework.server.ServerOptions;
 import org.apache.catalina.Context;
 import org.apache.catalina.Executor;
+import org.apache.catalina.authenticator.NonLoginAuthenticator;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.session.StandardManager;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.websocket.server.WsSci;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -200,15 +201,21 @@ public class TomcatServerFactory implements HttpServerFactory {
         };
     }
 
-    private static void configureManager(StandardManager manager) {
-        manager.setPathname(null);
-        try {
-            var random = SecureRandom.getInstanceStrong();
-            manager.setSessionIdGenerator(new StrongIdGenerator(random));
-        } catch (NoSuchAlgorithmException e) {
-            // Default fallback
-            manager.setSecureRandomAlgorithm("DRBG");
+    private static SecureRandom getSecureRandom(OptionSet options) {
+        if (options == null) {
+            return SecureUtil.getSecureRandom();
         }
+        var supplier = options.get(TomcatOptions.SECURE_RANDOM);
+        if (supplier == null) {
+            return SecureUtil.getSecureRandom();
+        }
+        return supplier.get();
+    }
+
+    private static void configureManager(StandardManager manager, SecureRandom random) {
+        manager.setPathname(null);
+        manager.setSessionIdGenerator(new SecureIdGenerator(random));
+        manager.setSecureRandomAlgorithm(random.getAlgorithm());
     }
 
     private Path getRoot() {
@@ -255,13 +262,20 @@ public class TomcatServerFactory implements HttpServerFactory {
         context.setJspConfigDescriptor(null);
         context.setIgnoreAnnotations(true);
         context.setJarScanner(new NoopJarScanner());
+        var random = getSecureRandom(set);
         var manager = context.getManager();
         if (manager == null) {
             var sm = new StandardManager();
-            configureManager(sm);
+            configureManager(sm, random);
             context.setManager(sm);
         } else if (manager instanceof StandardManager) {
-            configureManager((StandardManager) manager);
+            configureManager((StandardManager) manager, random);
+        }
+        if (context.getLoginConfig() == null) {
+            context.setLoginConfig(new LoginConfig("NONE", null, null, null));
+            var auth = new NonLoginAuthenticator();
+            auth.setSecureRandomAlgorithm(random.getAlgorithm());
+            context.getPipeline().addValve(auth);
         }
         var cookies = set != null && set.asKey(TomcatOptions.USE_SESSION_COOKIES);
         if (!cookies) {

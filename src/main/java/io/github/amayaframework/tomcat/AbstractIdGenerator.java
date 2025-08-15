@@ -2,16 +2,12 @@ package io.github.amayaframework.tomcat;
 
 import org.apache.catalina.SessionIdGenerator;
 
-import java.security.SecureRandom;
-
-final class StrongIdGenerator implements SessionIdGenerator {
-    private final SecureRandom random;
-    private String jvmRoute;
-    private int sessionIdLength = 16;
-
-    StrongIdGenerator(SecureRandom random) {
-        this.random = random;
-    }
+/**
+ * TODO
+ */
+public abstract class AbstractIdGenerator implements SessionIdGenerator {
+    protected String jvmRoute;
+    protected int sessionIdLength = 16;
 
     @Override
     public String getJvmRoute() {
@@ -38,6 +34,8 @@ final class StrongIdGenerator implements SessionIdGenerator {
         return generateSessionId(jvmRoute);
     }
 
+    protected abstract void nextBytes(byte[] buf);
+
     @Override
     public String generateSessionId(String route) {
         // Code from org.apache.catalina.util.StandardSessionIdGenerator
@@ -58,7 +56,6 @@ final class StrongIdGenerator implements SessionIdGenerator {
          * limitations under the License.
          */
         var randomBuf = new byte[16];
-        var sessionIdLength = getSessionIdLength();
 
         // Render the result as a String of hexadecimal digits
         // Start with enough space for sessionIdLength and medium route size
@@ -67,7 +64,7 @@ final class StrongIdGenerator implements SessionIdGenerator {
         int resultLenBytes = 0;
 
         while (resultLenBytes < sessionIdLength) {
-            random.nextBytes(randomBuf);
+            nextBytes(randomBuf);
             for (int j = 0; j < randomBuf.length && resultLenBytes < sessionIdLength; j++) {
                 byte b1 = (byte) ((randomBuf[j] & 0xf0) >> 4);
                 byte b2 = (byte) (randomBuf[j] & 0x0f);
@@ -87,11 +84,8 @@ final class StrongIdGenerator implements SessionIdGenerator {
 
         if (route != null && !route.isEmpty()) {
             buffer.append('.').append(route);
-        } else {
-            String jvmRoute = getJvmRoute();
-            if (jvmRoute != null && !jvmRoute.isEmpty()) {
-                buffer.append('.').append(jvmRoute);
-            }
+        } else if (jvmRoute != null && !jvmRoute.isEmpty()) {
+            buffer.append('.').append(jvmRoute);
         }
 
         return buffer.toString();

@@ -6,12 +6,14 @@ import io.github.amayaframework.http.HttpVersion;
 import io.github.amayaframework.options.Key;
 import org.apache.catalina.Context;
 import org.apache.catalina.Executor;
+import org.apache.catalina.SessionIdGenerator;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.coyote.http2.Http2Protocol;
 import org.apache.tomcat.util.net.SSLHostConfig;
 
 import java.net.InetSocketAddress;
+import java.security.SecureRandom;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -140,6 +142,11 @@ public final class TomcatOptions {
             "http2_configurer",
             new JType<>(){}
     );
+
+    /**
+     *
+     */
+    public static final Key<Supplier<SecureRandom>> SECURE_RANDOM = Key.of("secure_random", new JType<>(){});
 
     /**
      * Creates an SSL configuration option key string for the given address.
