@@ -17,7 +17,6 @@ final class Http1ConnectorFactory implements ConnectorFactory {
         if (executor != null) {
             ret.getProtocolHandler().setExecutor(executor);
         }
-        ret.setXpoweredBy(true);
         Util.setAddress(ret, address);
         Util.configureSSL(ret, protocol, address, options);
         Util.configureHttp1(protocol, options);

@@ -15,8 +15,10 @@ final class Util {
     }
 
     static final String HOST_PROPERTY = "address";
+    static final String SERVER_HEADER = "Tomcat(10.1.44)";
 
     static void configureHttp1(Http11NioProtocol protocol, OptionSet options) {
+        protocol.setServer(SERVER_HEADER);
         var configurer = options.get(TomcatOptions.HTTP1_CONFIGURER);
         if (configurer == null) {
             return;
