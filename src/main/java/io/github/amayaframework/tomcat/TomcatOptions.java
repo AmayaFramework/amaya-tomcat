@@ -144,7 +144,13 @@ public final class TomcatOptions {
     );
 
     /**
+     * The key for supplying a custom {@link SecureRandom} instance to be used
+     * by Tomcat's session ID generator.
      *
+     * <p>Required type: {@link Supplier} of {@link SecureRandom}.
+     * This can be used to override the default random number generator used for
+     * creating session identifiers, for example to change the algorithm or source
+     * of randomness.
      */
     public static final Key<Supplier<SecureRandom>> SECURE_RANDOM = Key.of("secure_random", new JType<>(){});
 

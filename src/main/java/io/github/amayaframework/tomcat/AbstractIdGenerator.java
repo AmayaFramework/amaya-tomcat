@@ -3,7 +3,13 @@ package io.github.amayaframework.tomcat;
 import org.apache.catalina.SessionIdGenerator;
 
 /**
- * TODO
+ * An abstract base class for {@link SessionIdGenerator} implementations
+ * that provides common handling of JVM route and session ID length,
+ * as well as the default algorithm for encoding random bytes into
+ * hexadecimal session identifiers.
+ *
+ * <p>Subclasses must implement {@link #nextBytes(byte[])} to supply
+ * cryptographically strong or otherwise suitable random bytes.
  */
 public abstract class AbstractIdGenerator implements SessionIdGenerator {
     protected String jvmRoute;
@@ -34,6 +40,11 @@ public abstract class AbstractIdGenerator implements SessionIdGenerator {
         return generateSessionId(jvmRoute);
     }
 
+    /**
+     * Fills the provided byte array with random data.
+     *
+     * @param buf the byte array to fill with random bytes
+     */
     protected abstract void nextBytes(byte[] buf);
 
     @Override
