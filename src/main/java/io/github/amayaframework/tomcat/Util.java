@@ -3,6 +3,7 @@ package io.github.amayaframework.tomcat;
 import io.github.amayaframework.http.HttpVersion;
 import io.github.amayaframework.options.OptionSet;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.util.ServerInfo;
 import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.coyote.http2.Http2Protocol;
@@ -11,14 +12,15 @@ import org.apache.tomcat.util.net.SSLHostConfig;
 import java.net.InetSocketAddress;
 
 final class Util {
+    static final String HOST_PROPERTY = "address";
+
     private Util() {
     }
 
-    static final String HOST_PROPERTY = "address";
-    static final String SERVER_HEADER = "Tomcat(10.1.44)";
-
     static void configureHttp1(Http11NioProtocol protocol, OptionSet options) {
-        protocol.setServer(SERVER_HEADER);
+        if (options.asKey(TomcatOptions.SEND_SERVER)) {
+            protocol.setServer(ServerInfo.getServerInfo());
+        }
         var configurer = options.get(TomcatOptions.HTTP1_CONFIGURER);
         if (configurer == null) {
             return;

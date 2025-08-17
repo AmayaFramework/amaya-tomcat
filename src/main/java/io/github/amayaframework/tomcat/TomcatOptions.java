@@ -6,7 +6,6 @@ import io.github.amayaframework.http.HttpVersion;
 import io.github.amayaframework.options.Key;
 import org.apache.catalina.Context;
 import org.apache.catalina.Executor;
-import org.apache.catalina.SessionIdGenerator;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.coyote.http2.Http2Protocol;
@@ -25,6 +24,19 @@ import java.util.function.Supplier;
 public final class TomcatOptions {
     private TomcatOptions() {
     }
+
+    /**
+     * The key for the flag that controls whether the server includes the
+     * {@code Server} HTTP response header (e.g. {@code "Apache Tomcat/10.x.y"}).
+     *
+     * <p>When enabled, Tomcat will send its version information in the
+     * {@code Server} header for all responses. Disabling this option suppresses
+     * the header entirely, which may be desirable for security hardening or
+     * to reduce information disclosure.
+     *
+     * <p>Required type: {@link Boolean}.
+     */
+    public static final String SEND_SERVER = "send_server";
 
     /**
      * The key for the listened ports option.
