@@ -62,13 +62,16 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
         var amayaRequest = new TomcatRequest(req, version, methodBuffer, tokenizer, parser);
         amayaRequest.updateHttpMethod(method);
         // Create amaya response
-        var scheme = req.getScheme();
-        var amayaResponse = new TomcatResponse(res, rawVersion, scheme, version, formatter);
-        // Create context
-        return new TomcatHttpContext(
-                req, res, // Original context
-                amayaRequest, amayaResponse, // Amaya context
-                version, codeBuffer, parser // Params for wrapped context
+        var amayaResponse = new TomcatResponse(
+                res,
+                parser,
+                formatter,
+                codeBuffer,
+                version,
+                rawVersion,
+                req.getScheme()
         );
+        // Create context
+        return new TomcatHttpContext(req, res, amayaRequest, amayaResponse);
     }
 }
