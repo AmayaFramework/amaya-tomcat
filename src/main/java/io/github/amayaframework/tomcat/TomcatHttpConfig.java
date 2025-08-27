@@ -3,10 +3,7 @@ package io.github.amayaframework.tomcat;
 import com.github.romanqed.jfunc.Runnable0;
 import com.github.romanqed.jfunc.Runnable1;
 import io.github.amayaframework.http.HttpVersion;
-import io.github.amayaframework.server.HttpServerConfig;
-import io.github.amayaframework.server.MimeFormatter;
-import io.github.amayaframework.server.MimeParser;
-import io.github.amayaframework.server.PathTokenizer;
+import io.github.amayaframework.server.*;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import org.apache.catalina.Context;
@@ -16,8 +13,8 @@ import java.util.Objects;
 import java.util.Set;
 
 final class TomcatHttpConfig implements HttpServerConfig {
-    private static final MimeFormatter DEFAULT_FORMATTER = new TomcatMimeFormatter();
-    private static final MimeParser DEFAULT_PARSER = new TomcatMimeParser();
+    private static final MimeFormatter DEFAULT_FORMATTER = new StandardMimeFormatter();
+    private static final MimeParser DEFAULT_PARSER = new StandardMimeParser();
     private static final PathTokenizer DEFAULT_TOKENIZER = new TomcatPathTokenizer();
 
     final AddressSet addresses;
