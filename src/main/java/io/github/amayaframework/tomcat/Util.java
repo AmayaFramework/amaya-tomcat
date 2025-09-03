@@ -2,6 +2,7 @@ package io.github.amayaframework.tomcat;
 
 import io.github.amayaframework.http.HttpVersion;
 import io.github.amayaframework.options.OptionSet;
+import io.github.amayaframework.server.ServerOptions;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.util.ServerInfo;
 import org.apache.coyote.http11.AbstractHttp11Protocol;
@@ -18,7 +19,7 @@ final class Util {
     }
 
     static void configureHttp1(Http11NioProtocol protocol, OptionSet options) {
-        if (options.asKey(TomcatOptions.SEND_SERVER)) {
+        if (options.asKey(ServerOptions.SEND_SERVER)) {
             protocol.setServer(ServerInfo.getServerInfo());
         }
         var configurer = options.get(TomcatOptions.HTTP1_CONFIGURER);
@@ -57,6 +58,7 @@ final class Util {
     }
 
     static void configureConnector(Connector connector, HttpVersion version, OptionSet options) {
+        connector.setXpoweredBy(options.asKey(ServerOptions.SEND_POWERED_BY));
         var configurer = options.get(TomcatOptions.CONNECTOR_CONFIGURER);
         if (configurer != null) {
             configurer.accept(version, connector);

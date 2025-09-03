@@ -4,9 +4,7 @@ import com.github.romanqed.jfunc.Runnable0;
 import com.github.romanqed.jfunc.Runnable1;
 import io.github.amayaframework.context.HttpContext;
 import io.github.amayaframework.http.HttpVersion;
-import io.github.amayaframework.server.MimeFormatter;
-import io.github.amayaframework.server.MimeParser;
-import io.github.amayaframework.server.PathTokenizer;
+import io.github.amayaframework.server.*;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -58,20 +56,12 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
             res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown http method");
             return null;
         }
-        // Create amaya request
-        var amayaRequest = new TomcatRequest(req, version, methodBuffer, tokenizer, parser);
-        amayaRequest.updateHttpMethod(method);
-        // Create amaya response
-        var amayaResponse = new TomcatResponse(
-                res,
-                parser,
-                formatter,
-                codeBuffer,
-                version,
-                rawVersion,
-                req.getScheme()
-        );
         // Create context
-        return new TomcatHttpContext(req, res, amayaRequest, amayaResponse);
+        return new TomcatHttpContext(
+                req,
+                res,
+                new TomcatRequest(req, version, method, tokenizer, parser),
+                new ServerHttpResponse(res, parser, formatter, codeBuffer, version, rawVersion, req.getScheme())
+        );
     }
 }

@@ -7,9 +7,7 @@ import io.github.amayaframework.http.HttpCode;
 import io.github.amayaframework.http.HttpMethod;
 import io.github.amayaframework.options.OptionSet;
 import io.github.amayaframework.options.Options;
-import io.github.amayaframework.server.HttpServer;
-import io.github.amayaframework.server.HttpServerFactory;
-import io.github.amayaframework.server.ServerOptions;
+import io.github.amayaframework.server.*;
 import org.apache.catalina.Context;
 import org.apache.catalina.Executor;
 import org.apache.catalina.authenticator.NonLoginAuthenticator;
@@ -34,8 +32,8 @@ import java.util.function.Supplier;
  * custom {@link Executor} suppliers, and a root directory for Tomcat files.
  */
 public class TomcatServerFactory implements HttpServerFactory {
-    private static final boolean JVM_21 = Runtime.version().feature() >= 21;
-    private static final boolean PREFER_ASYNC = !JVM_21;
+    private static final boolean VIRTUAL_THREADS = VirtualThreads.areSupported();
+    private static final boolean PREFER_ASYNC = !VIRTUAL_THREADS;
 
     private final TomcatFactory tomcatFactory;
     private final TomcatContextConfigurer contextConfigurer;
@@ -129,7 +127,7 @@ public class TomcatServerFactory implements HttpServerFactory {
     private static void processBindOptions(Set<InetSocketAddress> set, OptionSet options) {
         // Add ports
         var port = options.get(ServerOptions.PORT);
-        var ports = options.get(TomcatOptions.PORTS);
+        var ports = options.get(ServerOptions.PORTS);
         if (port != null) {
             set.add(new InetSocketAddress(port));
         }
@@ -138,7 +136,7 @@ public class TomcatServerFactory implements HttpServerFactory {
         }
         // Add ips
         var ip = options.get(ServerOptions.IP);
-        var ips = options.get(TomcatOptions.IPS);
+        var ips = options.get(ServerOptions.IPS);
         if (ip != null) {
             set.add(ip);
         }
@@ -151,7 +149,7 @@ public class TomcatServerFactory implements HttpServerFactory {
         if (options == null) {
             return HttpMethod::of;
         }
-        var buffer = options.get(TomcatOptions.HTTP_METHOD_BUFFER);
+        var buffer = options.get(ServerOptions.HTTP_METHOD_BUFFER);
         if (buffer == null) {
             return HttpMethod::of;
         }
@@ -162,7 +160,7 @@ public class TomcatServerFactory implements HttpServerFactory {
         if (options == null) {
             return HttpCode::of;
         }
-        var buffer = options.get(TomcatOptions.HTTP_CODE_BUFFER);
+        var buffer = options.get(ServerOptions.HTTP_CODE_BUFFER);
         if (buffer == null) {
             return HttpCode::of;
         }
@@ -173,7 +171,7 @@ public class TomcatServerFactory implements HttpServerFactory {
         if (set == null) {
             return PREFER_ASYNC;
         }
-        var flag = set.get(TomcatOptions.PREFER_ASYNC);
+        var flag = set.get(ServerOptions.PREFER_ASYNC);
         if (flag == null) {
             return PREFER_ASYNC;
         }
@@ -309,7 +307,7 @@ public class TomcatServerFactory implements HttpServerFactory {
     }
 
     private Supplier<Executor> getExecutorSupplier() {
-        if (executorSupplier == null && JVM_21) {
+        if (executorSupplier == null && VIRTUAL_THREADS) {
             return VirtualThreadExecutor::new;
         }
         return executorSupplier;
