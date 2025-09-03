@@ -51,8 +51,7 @@ public final class TomcatOptions {
      * is used to create the executor for server connectors. For per-address executors use
      * {@link #executorKey(InetSocketAddress)} / {@link #executorStringKey(InetSocketAddress)}.
      */
-    public static final Key<Supplier<Executor>> EXECUTOR = Key.of("executor", new JType<>() {
-    });
+    public static final Key<Supplier<Executor>> EXECUTOR = Key.of("executor", new JType<>(){});
 
     /**
      * Prefix for option keys that refer to per-address executor suppliers.
@@ -69,8 +68,7 @@ public final class TomcatOptions {
      * is executed after a {@link Context} is created and configured, allowing additional
      * programmatic customization (for example registering servlets, filters or attributes).
      */
-    public static final Key<Runnable1<Context>> CONTEXT_INITIALIZER = Key.of("ctx_initializer", new JType<>() {
-    });
+    public static final Key<Runnable1<Context>> CONTEXT_INITIALIZER = Key.of("ctx_initializer", new JType<>(){});
 
     /**
      * The key for the connector configurer option.
@@ -79,8 +77,7 @@ public final class TomcatOptions {
      */
     public static final Key<BiConsumer<HttpVersion, Connector>> CONNECTOR_CONFIGURER = Key.of(
             "connector_configurer",
-            new JType<>() {
-            }
+            new JType<>(){}
     );
 
     /**
@@ -92,8 +89,7 @@ public final class TomcatOptions {
      */
     public static final Key<Consumer<Http11NioProtocol>> HTTP1_CONFIGURER = Key.of(
             "http1_configurer",
-            new JType<>() {
-            }
+            new JType<>(){}
     );
 
     /**
@@ -105,8 +101,7 @@ public final class TomcatOptions {
      */
     public static final Key<Consumer<Http2Protocol>> HTTP2_CONFIGURER = Key.of(
             "http2_configurer",
-            new JType<>() {
-            }
+            new JType<>(){}
     );
 
     /**
@@ -118,8 +113,7 @@ public final class TomcatOptions {
      * creating session identifiers, for example to change the algorithm or source
      * of randomness.
      */
-    public static final Key<Supplier<SecureRandom>> SECURE_RANDOM = Key.of("secure_random", new JType<>() {
-    });
+    public static final Key<Supplier<SecureRandom>> SECURE_RANDOM = Key.of("secure_random", new JType<>(){});
 
     /**
      * Creates an SSL configuration option key string for the given address.
@@ -221,8 +215,7 @@ public final class TomcatOptions {
      * @return the executor key
      */
     public static Key<Supplier<Executor>> executorKey(InetSocketAddress address) {
-        return Key.of(executorStringKey(address), new JType<>() {
-        });
+        return Key.of(executorStringKey(address), new JType<>(){});
     }
 
     /**
@@ -233,8 +226,7 @@ public final class TomcatOptions {
      * @return the executor key
      */
     public static Key<Supplier<Executor>> executorKey(String host, int port) {
-        return Key.of(executorStringKey(host, port), new JType<>() {
-        });
+        return Key.of(executorStringKey(host, port), new JType<>(){});
     }
 
     /**
@@ -244,7 +236,6 @@ public final class TomcatOptions {
      * @return the executor key
      */
     public static Key<Supplier<Executor>> executorKey(int port) {
-        return Key.of(executorStringKey(port), new JType<>() {
-        });
+        return Key.of(executorStringKey(port), new JType<>(){});
     }
 }
