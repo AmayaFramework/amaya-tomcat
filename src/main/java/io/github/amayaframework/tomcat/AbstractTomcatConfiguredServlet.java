@@ -3,6 +3,7 @@ package io.github.amayaframework.tomcat;
 import com.github.romanqed.jfunc.Runnable0;
 import com.github.romanqed.jfunc.Runnable1;
 import io.github.amayaframework.context.HttpContext;
+import io.github.amayaframework.http.HttpCode;
 import io.github.amayaframework.http.HttpVersion;
 import io.github.amayaframework.server.*;
 import jakarta.servlet.ServletConfig;
@@ -13,6 +14,7 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
     protected final HttpMethodBuffer methodBuffer;
     protected final HttpCodeBuffer codeBuffer;
     protected final HttpVersion version;
+    protected final HttpErrorHandler handler;
     protected final PathTokenizer tokenizer;
     protected final MimeParser parser;
     protected final MimeFormatter formatter;
@@ -22,6 +24,7 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
                                               HttpMethodBuffer methodBuffer,
                                               HttpCodeBuffer codeBuffer,
                                               HttpVersion version,
+                                              HttpErrorHandler handler,
                                               PathTokenizer tokenizer,
                                               MimeParser parser,
                                               MimeFormatter formatter) {
@@ -29,6 +32,7 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
         this.methodBuffer = methodBuffer;
         this.codeBuffer = codeBuffer;
         this.version = version;
+        this.handler = handler;
         this.tokenizer = tokenizer;
         this.parser = parser;
         this.formatter = formatter;
@@ -38,22 +42,19 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
         // Get raw http version
         var rawVersion = req.getProtocol();
         if (rawVersion == null) {
-            res.sendError(HttpServletResponse.SC_HTTP_VERSION_NOT_SUPPORTED, "Unknown http version");
+            handler.handle(res, HttpCode.HTTP_VERSION_NOT_SUPPORTED, "Unknown http version");
             return null;
         }
         // Parse and check an http version
         var version = HttpVersion.of(rawVersion);
         if (version == null || version.after(this.version)) {
-            res.sendError(
-                    HttpServletResponse.SC_HTTP_VERSION_NOT_SUPPORTED,
-                    "Version " + rawVersion + " not supported"
-            );
+            handler.handle(res, HttpCode.HTTP_VERSION_NOT_SUPPORTED, "Version " + rawVersion + " not supported");
             return null;
         }
         // Parse and check http method
         var method = methodBuffer.get(req.getMethod());
         if (method == null || !method.isSupported(version)) {
-            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown http method");
+            handler.handle(res, HttpCode.BAD_REQUEST, "Unknown http method");
             return null;
         }
         // Create context
@@ -61,7 +62,7 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
                 req,
                 res,
                 new TomcatRequest(req, version, method, tokenizer, parser),
-                new ServerHttpResponse(res, parser, formatter, codeBuffer, version, rawVersion, req.getScheme())
+                new ServerHttpResponse(res, handler, parser, formatter, codeBuffer, version, rawVersion, req.getScheme())
         );
     }
 }

@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 
 final class TomcatHttpConfig implements HttpServerConfig {
+    private static final HttpErrorHandler DEFAULT_ERROR_HANDLER = new StandardErrorHandler();
     private static final MimeFormatter DEFAULT_FORMATTER = new StandardMimeFormatter();
     private static final MimeParser DEFAULT_PARSER = new StandardMimeParser();
     private static final PathTokenizer DEFAULT_TOKENIZER = new SplitPathTokenizer();
@@ -22,6 +23,7 @@ final class TomcatHttpConfig implements HttpServerConfig {
     Runnable1<ServletConfig> onInit;
     Runnable0 onDestroy;
     HttpVersion version;
+    HttpErrorHandler errorHandler;
     PathTokenizer tokenizer;
     MimeParser parser;
     MimeFormatter formatter;
@@ -31,6 +33,7 @@ final class TomcatHttpConfig implements HttpServerConfig {
         this.context = context;
         this.version = HttpVersion.HTTP_1_1;
         this.addresses.version = HttpVersion.HTTP_1_1;
+        this.errorHandler = DEFAULT_ERROR_HANDLER;
         this.tokenizer = DEFAULT_TOKENIZER;
         this.parser = DEFAULT_PARSER;
         this.formatter = DEFAULT_FORMATTER;
@@ -82,6 +85,16 @@ final class TomcatHttpConfig implements HttpServerConfig {
     @Override
     public void addAddress(InetSocketAddress address, HttpVersion version) {
         this.addresses.add(address, version);
+    }
+
+    @Override
+    public HttpErrorHandler errorHandler() {
+        return errorHandler;
+    }
+
+    @Override
+    public void errorHandler(HttpErrorHandler errorHandler) {
+        this.errorHandler = Objects.requireNonNull(errorHandler);
     }
 
     @Override

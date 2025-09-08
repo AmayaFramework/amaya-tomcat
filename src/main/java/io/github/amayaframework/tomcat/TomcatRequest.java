@@ -14,8 +14,13 @@ final class TomcatRequest extends ServerHttpRequest {
                   HttpMethod method,
                   PathTokenizer tokenizer,
                   MimeParser parser) {
-        super(request, version, null, tokenizer, parser);
+        super(request, version, tokenizer, parser);
         this.method = method;
+    }
+
+    @Override
+    protected HttpMethod parseHttpMethod(String s) {
+        return null;
     }
 
     @Override
