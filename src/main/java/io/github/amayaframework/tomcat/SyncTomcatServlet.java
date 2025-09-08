@@ -17,11 +17,12 @@ final class SyncTomcatServlet extends AbstractTomcatConfiguredServlet {
                       HttpMethodBuffer methodBuffer,
                       HttpCodeBuffer codeBuffer,
                       HttpVersion version,
+                      HttpErrorHandler errorHandler,
                       PathTokenizer tokenizer,
                       MimeParser parser,
                       MimeFormatter formatter,
                       Runnable1<HttpContext> handler) {
-        super(onInit, onDestroy, methodBuffer, codeBuffer, version, tokenizer, parser, formatter);
+        super(onInit, onDestroy, methodBuffer, codeBuffer, version, errorHandler, tokenizer, parser, formatter);
         this.handler = handler;
     }
 
