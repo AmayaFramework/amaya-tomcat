@@ -15,7 +15,7 @@ java {
     withSourcesJar()
 }
 
-def tomcatVersion = '10.1.44'
+def tomcatVersion = '10.1.45'
 
 group = 'io.github.amayaframework'
 archivesBaseName = 'amaya-tomcat'
@@ -39,7 +39,7 @@ dependencies {
     compileOnly group: 'io.github.amayaframework', name: 'amaya-context', version: '3.1.0'
     compileOnly group: 'io.github.amayaframework', name: 'amaya-server', version: '2.4.0'
     // Tomcat core
-    api group: 'io.github.amayaframework', name: 'tomcat-embed-core', version: tomcatVersion + '-4'
+    api group: 'io.github.amayaframework', name: 'tomcat-embed-core', version: tomcatVersion
     // Tomcat websockets
     compileOnly group: 'io.github.amayaframework', name: 'tomcat-embed-websocket', version: tomcatVersion
 }

@@ -14,7 +14,7 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
     protected final HttpMethodBuffer methodBuffer;
     protected final HttpCodeBuffer codeBuffer;
     protected final HttpVersion version;
-    protected final HttpErrorHandler handler;
+    protected final HttpErrorHandler errorHandler;
     protected final PathTokenizer tokenizer;
     protected final MimeParser parser;
     protected final MimeFormatter formatter;
@@ -24,7 +24,7 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
                                               HttpMethodBuffer methodBuffer,
                                               HttpCodeBuffer codeBuffer,
                                               HttpVersion version,
-                                              HttpErrorHandler handler,
+                                              HttpErrorHandler errorHandler,
                                               PathTokenizer tokenizer,
                                               MimeParser parser,
                                               MimeFormatter formatter) {
@@ -32,7 +32,7 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
         this.methodBuffer = methodBuffer;
         this.codeBuffer = codeBuffer;
         this.version = version;
-        this.handler = handler;
+        this.errorHandler = errorHandler;
         this.tokenizer = tokenizer;
         this.parser = parser;
         this.formatter = formatter;
@@ -42,19 +42,19 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
         // Get raw http version
         var rawVersion = req.getProtocol();
         if (rawVersion == null) {
-            handler.handle(res, HttpCode.HTTP_VERSION_NOT_SUPPORTED, "Unknown http version");
+            errorHandler.handle(res, HttpCode.HTTP_VERSION_NOT_SUPPORTED, "Unknown http version");
             return null;
         }
         // Parse and check an http version
         var version = HttpVersion.of(rawVersion);
         if (version == null || version.after(this.version)) {
-            handler.handle(res, HttpCode.HTTP_VERSION_NOT_SUPPORTED, "Version " + rawVersion + " not supported");
+            errorHandler.handle(res, HttpCode.HTTP_VERSION_NOT_SUPPORTED, "Version " + rawVersion + " not supported");
             return null;
         }
         // Parse and check http method
         var method = methodBuffer.get(req.getMethod());
         if (method == null || !method.isSupported(version)) {
-            handler.handle(res, HttpCode.BAD_REQUEST, "Unknown http method");
+            errorHandler.handle(res, HttpCode.BAD_REQUEST, "Unknown http method");
             return null;
         }
         // Create context
@@ -62,7 +62,7 @@ abstract class AbstractTomcatConfiguredServlet extends AbstractTomcatServlet {
                 req,
                 res,
                 new TomcatRequest(req, version, method, tokenizer, parser),
-                new ServerHttpResponse(res, handler, parser, formatter, codeBuffer, version, rawVersion, req.getScheme())
+                new ServerHttpResponse(res, errorHandler, parser, formatter, codeBuffer, version, rawVersion, req.getScheme())
         );
     }
 }
