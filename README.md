@@ -21,9 +21,9 @@ To install it, you will need:
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-tomcat', version: '3.3.0-10.1.44'
+    implementation group: 'io.github.amayaframework', name: 'amaya-tomcat', version: '3.3.1-10.1.45'
     // For websocket support (optionally)
-    implementation group: 'io.github.amayaframework', name: 'tomcat-embed-websocket', version: '10.1.44'
+    implementation group: 'io.github.amayaframework', name: 'tomcat-embed-websocket', version: '10.1.45'
 }
 ```
 
@@ -34,14 +34,14 @@ dependencies {
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-tomcat</artifactId>
-        <version>3.3.0-10.1.44</version>
+        <version>3.3.1-10.1.45</version>
     </dependency>
     
     <!-- For Websocket support (optionally) -->
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>tomcat-embed-websocket</artifactId>
-        <version>10.1.44</version>
+        <version>10.1.45</version>
     </dependency>
 ```
 
