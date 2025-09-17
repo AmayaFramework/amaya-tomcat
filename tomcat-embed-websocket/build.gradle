@@ -31,7 +31,7 @@ java {
     withJavadocJar()
 }
 
-def tomcatVersion = '10.1.45'
+def tomcatVersion = '10.1.46'
 
 group = 'io.github.amayaframework'
 archivesBaseName = 'tomcat-embed-websocket'
@@ -65,8 +65,6 @@ dependencies {
     // Websocket API
     api group: 'jakarta.websocket', name: 'jakarta.websocket-api', version: '2.1.1'
     api group: 'jakarta.websocket', name: 'jakarta.websocket-client-api', version: '2.1.1'
-    // Tomcat Core
-    compileOnly group: 'io.github.amayaframework', name: 'tomcat-embed-core', version: tomcatVersion
 }
 
 static def isEmpty(Path path) {
