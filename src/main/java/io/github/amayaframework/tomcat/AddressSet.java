@@ -189,11 +189,24 @@ final class AddressSet implements Set<InetSocketAddress> {
 
     @Override
     public void clear() {
+        Throwable throwable = null;
         for (var connector : connectors.values()) {
             service.removeConnector(connector);
+            try {
+                connector.destroy();
+            } catch (Throwable e) {
+                if (throwable != null) {
+                    throwable.addSuppressed(e);
+                } else {
+                    throwable = e;
+                }
+            }
         }
         connectors.clear();
         executors.clear();
+        if (throwable != null) {
+            Exceptions.throwAny(throwable);
+        }
     }
 
     @Override
