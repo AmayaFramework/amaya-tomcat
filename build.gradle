@@ -15,7 +15,7 @@ java {
     withSourcesJar()
 }
 
-def tomcatVersion = '10.1.45'
+def tomcatVersion = '10.1.46'
 
 group = 'io.github.amayaframework'
 archivesBaseName = 'amaya-tomcat'
